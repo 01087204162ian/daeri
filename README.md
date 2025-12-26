@@ -1,26 +1,131 @@
-<<<<<<< HEAD
-osj 개발 ----------
+# Ian Development Root
 
-로컬 DEVELOPMENT 
+이 디렉터리는 Ian이 운영하는 모든 사업 및 서비스의 로컬 개발 루트입니다.
 
+## 1️⃣ D:\development 의 의미 (Root 정의)
 
+**D:\development** 👉 Ian이 운영·개발·관리하는 모든 사업 관련 서비스의 로컬 Root 디렉터리
 
+### 목적
+- 전체 사업 현황 파악
+- 서비스별 소스 코드 분리
+- 서버·도메인·역할을 명확히 구분
 
-https://disk-cms.simg.kr/login.html
-    simg cms
+### 원칙
+- ❌ 하나의 거대한 monorepo 아님
+- ⭕ 서비스 단위 / 도메인 단위로 완전 분리
+- ⭕ 각 폴더 = 하나의 "운영되는 서비스"
 
-    상품별 서버는 별도로 운영한다.
-1.kj대리운전 
-  url :pcikorea.com/api/insurance 
-=======
-osj 개발 ----------
+## 2️⃣ 현재 전체 구조 요약
 
+```
+D:\development
+│
+├─ disk-cms              (메인 CMS 서버)
+├─ pci0327               (KJ 대리운전 보험)
+├─ fstudent              (현장실습보험)
+├─ imet                  (약국배상책임보험)
+├─ kdrive                (KDRIVE 서비스)
+└─ simg-knowledge-lab    (내부 지식·매뉴얼 저장소)
+```
 
+## 3️⃣ 핵심: disk-cms (메인 CMS)
 
-https://disk-cms.simg.kr/login.html
-    simg cms
+**URL** 👉 https://disk-cms.simg.kr/login.html
 
-    상품별 서버는 별도로 운영한다.
-1.kj대리운전 
-  url :pcikorea.com/api/insurance 
->>>>>>> f40570853dc95baf915677bfdcf19a14c2ae7fd5
+**역할** 👉 모든 보험 상품과 운영 업무를 관통하는 메인 CMS
+
+### 성격
+- 프론트 중심
+- 인증 / 권한 / 공통 UI / 운영 화면
+- 실제 비즈니스 로직은 하위 서비스와 연동
+
+### 📦 disk-cms에서 관리하는 보험 상품 범위
+
+```
+CMS 보험상품 영역
+├─ 대리운전 보험
+│   └─ KJ 대리운전
+│       └─ 실제 소스: pci0327 (pcikorea.com)
+│
+├─ 근재보험
+├─ 현장실습보험
+│   └─ 실제 소스: fstudent
+│
+├─ 약국배상책임보험
+│   └─ 실제 소스: imet (imet.kr)
+│
+├─ 홀인원보험
+└─ 여행자보험
+```
+
+👉 disk-cms는 '컨트롤 타워',  
+👉 각 보험 상품은 독립 서비스(하위 폴더)
+
+## 4️⃣ 하위 서비스 폴더 정리
+
+### ① pci0327 – KJ 대리운전 보험
+
+**도메인** 👉 pcikorea.com
+
+**역할**
+- KJ 대리운전 보험 전용 서비스
+- 정책, 증권, 정산, 가입, 사고 관련 로직
+
+**CMS와의 관계**
+- disk-cms ↔ 프록시/API 연동
+- 소스는 절대 disk-cms에 섞지 않음 ❗
+
+### ② fstudent – 현장실습보험
+
+**역할**
+- 현장실습보험 전용 서비스
+- 학교 / 학생 / 실습기간 / 보험 가입 관리
+
+**CMS 역할**
+- disk-cms는 운영·관리 화면 제공
+- 실제 비즈니스 로직은 fstudent
+
+### ③ imet – 약국배상책임보험
+
+**도메인** 👉 imet.kr
+
+**역할**
+- 약국 배상책임보험
+- 가입 / 증권 / 사고 관리
+
+**특징**
+- 완전히 독립된 상품
+- CMS에서 "약국배상" 메뉴로만 연결
+
+### ④ kdrive – KDRIVE (별도 서비스)
+
+**URL** 👉 https://kdrive.simg.kr/
+
+**성격** 👉 disk-cms와 분리된 독립 서비스
+
+**특징**
+- 자체 UI / 자체 서비스 흐름
+- CMS 하위 상품이 아님
+- 향후 확장 가능성 높은 서비스
+
+👉 이건 CMS 외부 사업으로 보는 게 맞습니다.
+
+### ⑤ simg-knowledge-lab – 내부 지식 저장소
+
+**역할**
+- 직원 교육 자료
+- 매뉴얼
+- 운영 원칙
+- 기획 문서
+
+**특징**
+- 코드보다 지식 중심
+- GitHub Wiki / MD 파일 기반
+- 조직 학습용
+
+## 5️⃣ 구조 철학 한 줄 요약
+
+**disk-cms는 '뇌',  
+하위 폴더들은 '각각의 장기',  
+development는 'Ian의 사업 인체도'**
