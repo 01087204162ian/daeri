@@ -149,3 +149,101 @@ CMS 보험상품 영역
 **disk-cms는 '뇌',  
 하위 폴더들은 '각각의 장기',  
 development는 'Ian의 사업 인체도'**
+
+---
+
+## 6️⃣ 아키텍처 흐름 및 관계 이해
+
+### 6.1 전체 아키텍처 흐름
+
+```
+프론트엔드 (disk-cms/public/pages/*)
+    ↓
+Node.js 프록시 (disk-cms/routes/*)
+    ↓
+PHP 백엔드 API (각 하위 폴더/api/*)
+    ↓
+MySQL 데이터베이스
+```
+
+### 6.2 구체적인 서비스별 매핑
+
+#### 약국배상책임보험 (Pharmacy)
+- **프론트엔드**: `disk-cms/public/pages/pharmacy/`
+- **Node.js 프록시**: `disk-cms/routes/pharmacy.js`, `disk-cms/routes/pharmacy/*`
+- **PHP 백엔드**: `imet/api/pharmacy/*`
+- **프로덕션 URL**: `https://imet.kr/api/pharmacy/*`
+- **로컬 개발 경로**: `d:\development\imet\api\pharmacy\*`
+
+#### 현장실습보험 (Field Practice)
+- **프론트엔드**: `disk-cms/public/pages/field-practice/`
+- **Node.js 프록시**: `disk-cms/routes/field-practice/*`
+- **PHP 백엔드**: `fstudent` 또는 `silbo.kr`
+- **프로덕션 URL**: `https://silbo.kr/2025/api/question/*`
+
+#### KJ 대리운전 보험 (Insurance)
+- **프론트엔드**: `disk-cms/public/pages/insurance/`
+- **Node.js 프록시**: `disk-cms/routes/insurance/*`
+- **PHP 백엔드**: `pci0327/api/insurance/*`
+- **프로덕션 URL**: `https://pcikorea.com/api/insurance/*`
+
+### 6.3 핵심 원칙
+
+1. **disk-cms = 통합 프론트엔드 + 프록시 서버**
+   - 모든 보험 상품의 UI 제공
+   - Node.js로 PHP API 프록시 역할
+   - 인증/권한/공통 UI 관리
+
+2. **하위 폴더 = 독립 백엔드 서비스**
+   - 각 보험 상품의 비즈니스 로직
+   - PHP로 작성된 API 서버
+   - 독립 도메인으로 운영 (imet.kr, pcikorea.com 등)
+
+3. **소스 코드 분리 원칙**
+   - ❌ disk-cms에 PHP 코드를 섞지 않음
+   - ❌ 하위 폴더에 disk-cms 프론트엔드 코드를 섞지 않음
+   - ⭕ 각 서비스는 독립적으로 개발/배포
+
+### 6.4 실제 코드 예시
+
+**약국배상책임보험 프록시 예시**:
+```javascript
+// disk-cms/routes/pharmacy.js
+const apiUrl = 'https://imet.kr/api/pharmacy/pharmacy-list.php';
+// → 로컬 개발: imet/api/pharmacy/pharmacy-list.php
+```
+
+**프론트엔드에서 API 호출**:
+```javascript
+// disk-cms/public/js/pharmacy/pharmacy.js
+fetch('/api/pharmacy/list?page=1&limit=20')
+  ↓
+// disk-cms/routes/pharmacy.js (Node.js 프록시)
+  ↓
+// imet/api/pharmacy/pharmacy-list.php (PHP 백엔드)
+  ↓
+// MySQL 데이터베이스
+```
+
+### 6.5 작업 시 주의사항
+
+- **프론트엔드 작업**: `disk-cms/public/` 폴더에서 작업
+- **PHP 백엔드 작업**: 각 하위 폴더(`imet/`, `pci0327/` 등)에서 작업
+- **프록시 라우터 작업**: `disk-cms/routes/` 폴더에서 작업
+- **문서 작업**: `disk-cms/docs/` 폴더에 각 상품별로 분리하여 기록
+
+### 6.6 파일 경로 매핑 규칙
+
+| 구분 | 프로덕션 URL | 로컬 개발 경로 |
+|------|------------|--------------|
+| **약국배상 PHP API** | `https://imet.kr/api/pharmacy/*` | `d:\development\imet\api\pharmacy\*` |
+| **약국배상 프론트** | `https://disk-cms.simg.kr/pages/pharmacy/*` | `d:\development\disk-cms\public\pages\pharmacy\*` |
+| **약국배상 프록시** | `https://disk-cms.simg.kr/api/pharmacy/*` | `d:\development\disk-cms\routes\pharmacy\*` |
+| **대리운전 PHP API** | `https://pcikorea.com/api/insurance/*` | `d:\development\pci0327\api\insurance\*` |
+| **대리운전 프론트** | `https://disk-cms.simg.kr/pages/insurance/*` | `d:\development\disk-cms\public\pages\insurance\*` |
+| **대리운전 프록시** | `https://disk-cms.simg.kr/api/insurance/*` | `d:\development\disk-cms\routes\insurance\*` |
+
+**중요**: 
+- 프로덕션 URL `imet.kr` = 로컬 폴더 `imet`
+- 프로덕션 URL `pcikorea.com` = 로컬 폴더 `pci0327`
+- 프로덕션 URL `silbo.kr` = 로컬 폴더 `fstudent` (추정)
