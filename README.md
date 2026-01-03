@@ -92,7 +92,7 @@ CMS 보험상품 영역
 - `disk-cms`: 현재 운영 중인 바닐라JS 버전 (프로덕션)
 - `disk-cms-react`: 리액트 마이그레이션 버전 (개발 중)
 
-**참고**: 리액트 마이그레이션 계획은 `disk-cms/docs/REACT_MIGRATION_PLAN.md` 참고
+**참고**: 리액트 마이그레이션 계획은 `disk-cms/docs/REACT_MIGRATION_PLAN.md` 참고/
 
 ## 4️⃣ 하위 서비스 폴더 정리
 
