@@ -21,7 +21,8 @@
 ```
 D:\development
 │
-├─ disk-cms              (메인 CMS 서버)
+├─ disk-cms              (메인 CMS 서버 - 바닐라JS)
+├─ disk-cms-react         (리액트 마이그레이션 폴더)
 ├─ pci0327               (KJ 대리운전 보험)
 ├─ fstudent              (현장실습보험)
 ├─ imet                  (약국배상책임보험)
@@ -36,10 +37,16 @@ D:\development
 
 **역할** 👉 모든 보험 상품과 운영 업무를 관통하는 메인 CMS
 
+### 기술 스택
+- **Frontend**: 바닐라 JavaScript (Vanilla JS) + jQuery + AdminLTE 3.2.0
+- **Backend**: Node.js + Express.js (세션 기반 인증)
+- **Database**: MySQL 8.0
+
 ### 성격
 - 프론트 중심
 - 인증 / 권한 / 공통 UI / 운영 화면
 - 실제 비즈니스 로직은 하위 서비스와 연동
+- 현재 운영 중인 프로덕션 버전 (바닐라JS 기반)
 
 ### 📦 disk-cms에서 관리하는 보험 상품 범위
 
@@ -62,6 +69,30 @@ CMS 보험상품 영역
 
 👉 disk-cms는 '컨트롤 타워',  
 👉 각 보험 상품은 독립 서비스(하위 폴더)
+
+## 3.5️⃣ disk-cms-react (리액트 마이그레이션)
+
+**상태** 👉 리액트 마이그레이션 진행 중
+
+**목적** 👉 disk-cms를 바닐라JS에서 React로 점진적 마이그레이션
+
+### 기술 스택 (계획)
+- **Frontend**: React 18.3+ + Vite + TypeScript
+- **상태 관리**: Zustand
+- **UI 라이브러리**: Ant Design
+- **Backend**: Node.js + Express.js (기존 API 유지)
+- **인증**: 세션 → JWT 전환 예정
+
+### 마이그레이션 전략
+- 점진적 마이그레이션 (Strangler Pattern)
+- 모듈별 단계적 전환
+- 기존 disk-cms와 병행 운영
+
+### 폴더 구조
+- `disk-cms`: 현재 운영 중인 바닐라JS 버전 (프로덕션)
+- `disk-cms-react`: 리액트 마이그레이션 버전 (개발 중)
+
+**참고**: 리액트 마이그레이션 계획은 `disk-cms/docs/REACT_MIGRATION_PLAN.md` 참고
 
 ## 4️⃣ 하위 서비스 폴더 정리
 
