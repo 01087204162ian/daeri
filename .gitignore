@@ -82,3 +82,5 @@ simg-knowledge-lab/
 *.zip
 *.tar
 *.tar.gz
+BD/
+field/
