@@ -72,6 +72,9 @@ kdrive/
 pci0327/
 adjustment/
 simg-knowledge-lab/
+disk-cms-react/
+field/
+BD/
 
 # ======================================
 # 기타 개발환경에서 생기는 파일
@@ -82,5 +85,3 @@ simg-knowledge-lab/
 *.zip
 *.tar
 *.tar.gz
-BD/
-field/
