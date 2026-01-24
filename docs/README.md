@@ -58,3 +58,83 @@
 ### 운영 수신처
 - `OPERATOR_PHONE` (담당자 수신번호)
 
+## 7) 한 장 요약 체크리스트 (운영/배포)
+### A. Supabase 준비
+- [ ] Supabase 프로젝트 생성
+- [ ] SQL Editor에서 `docs/supabase-schema.sql` 실행
+- [ ] `partners`에 테넌트 추가
+  - [ ] `default`
+  - [ ] `kakao`
+  - [ ] `tmap`
+  - [ ] 기타 파트너(`cnmp`, `logi` 등)
+
+### B. Vercel 환경변수 설정
+- [ ] `SUPABASE_URL`
+- [ ] `SUPABASE_SERVICE_ROLE_KEY`
+- [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
+- [ ] `ALIGO_USER_ID`
+- [ ] `ALIGO_API_KEY`
+- [ ] `ALIGO_SENDER`
+- [ ] `ALIGO_SMS_URL`
+- [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시)
+- [ ] `OPERATOR_PHONE`
+
+### C. 도메인/테넌트 라우팅
+- [ ] Vercel 프로젝트에 `daeri-site.com` 도메인 연결
+- [ ] 필요한 서브도메인 추가
+  - [ ] `kakao.daeri-site.com`
+  - [ ] `tmap.daeri-site.com`
+  - [ ] 파트너 추가 시: `파트너코드.daeri-site.com` ↔ `partners.code=파트너코드`
+
+### D. 기능 동작 확인(최소)
+- [ ] `kakao.daeri-site.com`에서 **상담신청** 제출 → `consultations` row 생성 확인
+- [ ] `kakao.daeri-site.com`에서 **가입신청** 제출 → `applications` + `application_secrets` row 생성 확인
+- [ ] `OPERATOR_PHONE` 설정 시 문자 발송 확인 + `message_logs` 기록 확인
+
+### E. 운영 메모
+- [ ] 민감정보는 `application_secrets`에 **암호문으로만** 저장됨(복호화는 서버에서만 가능)
+- [ ] 카드 결제는 PG 없이 “접수”만 받고, **보험사 전산에서 당사 직원이 결제 처리**
+
+## 8) 로컬 테스트 방법
+### A. Supabase 준비
+- [ ] Supabase SQL Editor에서 `docs/supabase-schema.sql` 실행
+- [ ] `partners`에 최소 `default` 존재 확인 (seed 포함)
+- [ ] 로컬에서 서브도메인으로 테스트할 파트너가 있으면 `partners.code`로 추가
+  - 예: `kakao`, `tmap`
+
+### B. 로컬 환경변수 준비
+- `daeri/.env.local` 생성 후 아래 값 설정
+  - [ ] `SUPABASE_URL`
+  - [ ] `SUPABASE_SERVICE_ROLE_KEY`
+  - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
+  - [ ] `ALIGO_USER_ID`
+  - [ ] `ALIGO_API_KEY`
+  - [ ] `ALIGO_SENDER`
+  - [ ] `ALIGO_SMS_URL`
+  - [ ] `ALIGO_KAKAO_URL` (선택)
+  - [ ] `OPERATOR_PHONE` (선택: 설정 시 발송 시도)
+
+### C. 개발 서버 실행
+- `daeri` 폴더에서 실행
+  - [ ] `npm install`
+  - [ ] `npm run dev`
+  - 기본 접속: `http://localhost:3000`
+
+### D. 로컬에서 서브도메인(테넌트) 테스트(선택)
+> 로컬에서는 `Host=localhost`면 기본적으로 `default` 테넌트로 매핑됩니다.
+> 서브도메인별로 테스트하려면 hosts 파일을 사용합니다.
+
+- Windows hosts 파일: `C:\Windows\System32\drivers\etc\hosts`
+  - 예시:
+    - `127.0.0.1 kakao.daeri-site.com`
+    - `127.0.0.1 tmap.daeri-site.com`
+
+- 접속 예시:
+  - `http://kakao.daeri-site.com:3000`
+  - `http://tmap.daeri-site.com:3000`
+
+### E. 제출 동작 확인 포인트
+- [ ] 상담신청 제출 → Supabase `consultations`에 row 생성
+- [ ] 가입신청 제출 → Supabase `applications` + `application_secrets`에 row 생성
+- [ ] `OPERATOR_PHONE` 설정 시 → 문자 발송 시도 + `message_logs` 기록 확인
+
