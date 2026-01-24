@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -28,6 +29,46 @@ const contactMethods = [
 ]
 
 export function ConsultationCTA() {
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    serviceType: "",
+    message: "",
+    consentPrivacy: false,
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/consultations", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || "SUBMIT_FAILED")
+      }
+      setIsSubmitted(true)
+      setForm({
+        name: "",
+        phone: "",
+        serviceType: "",
+        message: "",
+        consentPrivacy: false,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "SUBMIT_FAILED")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <section id="consultation" className="py-12 sm:py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -74,23 +115,38 @@ export function ConsultationCTA() {
               정보를 남겨주시면 상담사가 연락드립니다.
             </p>
 
-            <form className="mt-6 space-y-5">
+            <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="name">이름</Label>
-                  <Input id="name" placeholder="홍길동" />
+                  <Label htmlFor="consult-name">이름</Label>
+                  <Input
+                    id="consult-name"
+                    placeholder="홍길동"
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">연락처</Label>
-                  <Input id="phone" type="tel" placeholder="010-0000-0000" />
+                  <Label htmlFor="consult-phone">연락처</Label>
+                  <Input
+                    id="consult-phone"
+                    type="tel"
+                    placeholder="010-0000-0000"
+                    required
+                    value={form.phone}
+                    onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                  />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="service-type">상담 유형</Label>
+                <Label htmlFor="consult-service-type">상담 유형</Label>
                 <select
-                  id="service-type"
+                  id="consult-service-type"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  value={form.serviceType}
+                  onChange={(e) => setForm((p) => ({ ...p, serviceType: e.target.value }))}
                 >
                   <option value="">선택해주세요</option>
                   <option value="proxy">대리운전 보험</option>
@@ -101,21 +157,26 @@ export function ConsultationCTA() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">문의 내용</Label>
+                <Label htmlFor="consult-message">문의 내용</Label>
                 <Textarea
-                  id="message"
+                  id="consult-message"
                   placeholder="문의하실 내용을 입력해주세요."
                   rows={4}
+                  value={form.message}
+                  onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
                 />
               </div>
 
               <div className="flex items-start gap-2">
                 <input
                   type="checkbox"
-                  id="privacy"
+                  id="consult-privacy"
                   className="mt-1 h-4 w-4 rounded border-input"
+                  checked={form.consentPrivacy}
+                  onChange={(e) => setForm((p) => ({ ...p, consentPrivacy: e.target.checked }))}
+                  required
                 />
-                <label htmlFor="privacy" className="text-sm text-muted-foreground">
+                <label htmlFor="consult-privacy" className="text-sm text-muted-foreground">
                   개인정보 수집 및 이용에 동의합니다.{" "}
                   <a href="#" className="text-primary underline">
                     자세히 보기
@@ -123,8 +184,19 @@ export function ConsultationCTA() {
                 </label>
               </div>
 
-              <Button type="submit" size="lg" className="w-full">
-                상담 신청하기
+              {error && (
+                <p className="text-sm text-destructive" role="alert">
+                  접수에 실패했습니다. 잠시 후 다시 시도해주세요. ({error})
+                </p>
+              )}
+              {isSubmitted && (
+                <p className="text-sm text-primary">
+                  상담 신청이 접수되었습니다. 담당자가 곧 연락드리겠습니다.
+                </p>
+              )}
+
+              <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? "접수 중..." : "상담 신청하기"}
               </Button>
             </form>
           </div>

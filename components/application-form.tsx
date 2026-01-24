@@ -30,12 +30,32 @@ export function ApplicationForm() {
     accountNumber: "",
     cardNumber: "",
     cardExpiry: "",
+    consentPrivacy: false,
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsSubmitted(true)
+    setError(null)
+    setIsSubmitting(true)
+    try {
+      const res = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(formData),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || "SUBMIT_FAILED")
+      }
+      setIsSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "SUBMIT_FAILED")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (field: string, value: string | boolean) => {
@@ -428,10 +448,33 @@ export function ApplicationForm() {
                 />
               </div>
 
+              {/* 개인정보 동의 */}
+              <div className="flex items-start gap-2 pt-2">
+                <Checkbox
+                  id="apply-consent"
+                  checked={formData.consentPrivacy}
+                  onCheckedChange={(checked) => handleChange("consentPrivacy", checked === true)}
+                />
+                <Label htmlFor="apply-consent" className="text-sm font-medium cursor-pointer">
+                  개인정보 수집 및 이용에 동의합니다 <span className="text-destructive">*</span>
+                </Label>
+              </div>
+
+              {error && (
+                <p className="text-sm text-destructive" role="alert">
+                  접수에 실패했습니다. 잠시 후 다시 시도해주세요. ({error})
+                </p>
+              )}
+
               {/* 제출 버튼 */}
               <div className="pt-4">
-                <Button type="submit" size="lg" className="w-full text-base">
-                  가입 신청하기
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full text-base"
+                  disabled={isSubmitting || !formData.consentPrivacy}
+                >
+                  {isSubmitting ? "접수 중..." : "가입 신청하기"}
                 </Button>
               </div>
             </form>
