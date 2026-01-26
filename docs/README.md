@@ -138,3 +138,66 @@
 - [ ] 가입신청 제출 → Supabase `applications` + `application_secrets`에 row 생성
 - [ ] `OPERATOR_PHONE` 설정 시 → 문자 발송 시도 + `message_logs` 기록 확인
 
+## 9) 빌드 방법
+### 프로덕션 빌드
+```bash
+cd daeri
+npm install
+npm run build
+```
+
+### 빌드 결과물 실행
+```bash
+npm run start
+```
+- 기본 접속: `http://localhost:3000`
+- 프로덕션 모드로 실행되며, 최적화된 빌드 결과물을 사용합니다.
+
+### 빌드 주의사항
+- 빌드 전에 환경변수(`.env.local` 또는 Vercel 환경변수)가 올바르게 설정되어 있는지 확인
+- 빌드 시 Next.js가 자동으로 최적화 및 정적 페이지 생성 수행
+- 빌드 경고가 발생할 수 있으나(예: workspace root 관련), 기능에는 영향 없음
+
+## 10) 개발 이력
+### 2026-01-26 - 반응형 디자인 개선 및 UI/UX 고도화
+#### 반응형 디자인 개선
+- **hero-section.tsx**: 보상하는 내용 테이블을 모바일에서 카드 형식으로 재구성
+  - 모바일(`lg` 미만): 각 보상 항목을 개별 카드로 표시
+  - 데스크톱(`lg` 이상): 기존 테이블 형식 유지
+  - 텍스트 잘림 문제 해결 및 가독성 향상
+
+- **product-cards.tsx**: 담보 및 보상한도 테이블을 모바일에서 카드 형식으로 재구성
+  - 모바일: 각 보상 항목을 카드 형식으로 표시
+  - 데스크톱: 기존 테이블 형식 유지
+  - "자기차량" 서브 항목을 들여쓰기와 왼쪽 테두리로 구분
+
+- **premium-calculator.tsx**: 보험료 산출 결과 테이블을 모바일에서 카드 형식으로 재구성
+  - 모바일: 각 연령대를 카드로 표시, 서비스 유형별 보험료를 세로로 나열
+  - 데스크톱: 기존 테이블 형식 유지
+  - 가로 스크롤 제거 및 모든 정보 표시
+
+#### 가입신청 폼 개선
+- **application-form.tsx**: 레이블과 입력상자를 한 행에 표시
+  - 모든 화면 크기에서 레이블과 입력상자가 가로로 배치되도록 변경
+  - `flex-row` 레이아웃 적용
+
+- **입력상자 스타일 고도화**
+  - 배경색: `bg-background` 적용
+  - 테두리: `border-border/60`으로 부드러운 색상
+  - 그림자: `shadow-sm` 적용
+  - Hover 효과: `hover:border-border hover:shadow-md`
+  - Focus 효과: `focus-visible:border-primary focus-visible:shadow-md`
+  - 전환 애니메이션: `transition-all duration-200`
+
+- **폰트 크기 통일**
+  - Input 컴포넌트 기본 텍스트 크기를 `text-sm`으로 통일
+  - 레이블(`text-sm`)과 플레이스홀더(`text-sm`) 폰트 크기 일치
+  - 모든 화면 크기에서 일관된 폰트 크기 유지
+
+#### 수정된 파일
+- `components/hero-section.tsx`
+- `components/product-cards.tsx`
+- `components/premium-calculator.tsx`
+- `components/application-form.tsx`
+- `components/ui/input.tsx`
+

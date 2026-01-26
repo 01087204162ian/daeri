@@ -191,13 +191,13 @@ export function ApplicationForm() {
           <div className="rounded-2xl border border-border bg-background p-6 shadow-sm lg:p-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* 보험 유형 선택 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label className="text-sm font-medium w-32 shrink-0">보험유형 <span className="text-destructive">*</span></Label>
                 <Select
                   value={formData.insuranceType}
                   onValueChange={(value) => handleChange("insuranceType", value)}
                 >
-                  <SelectTrigger className="h-10 flex-1">
+                  <SelectTrigger className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus:border-primary focus:shadow-md">
                     <SelectValue placeholder="보험 유형 선택" />
                   </SelectTrigger>
                   <SelectContent>
@@ -211,7 +211,7 @@ export function ApplicationForm() {
               </div>
 
               {/* 성명 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label htmlFor="name" className="text-sm font-medium w-32 shrink-0">
                   성명 <span className="text-destructive">*</span>
                 </Label>
@@ -221,12 +221,12 @@ export function ApplicationForm() {
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
                   required
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
               {/* 연락처 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label htmlFor="phone" className="text-sm font-medium w-32 shrink-0">
                   연락처 <span className="text-destructive">*</span>
                 </Label>
@@ -236,12 +236,12 @@ export function ApplicationForm() {
                   value={formData.phone}
                   onChange={(e) => handleChange("phone", e.target.value.replace(/\D/g, ""))}
                   required
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
               {/* 주민번호 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label className="text-sm font-medium w-32 shrink-0">
                   주민번호 <span className="text-destructive">*</span>
                 </Label>
@@ -252,7 +252,7 @@ export function ApplicationForm() {
                     value={formData.residentNumber1}
                     onChange={(e) => handleChange("residentNumber1", e.target.value.replace(/\D/g, ""))}
                     required
-                    className="h-10 flex-1"
+                    className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                   />
                   <span className="text-muted-foreground">-</span>
                   <Input
@@ -262,13 +262,13 @@ export function ApplicationForm() {
                     value={formData.residentNumber2}
                     onChange={(e) => handleChange("residentNumber2", e.target.value.replace(/\D/g, ""))}
                     required
-                    className="h-10 flex-1"
+                    className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                   />
                 </div>
               </div>
 
               {/* 보험료 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label htmlFor="yearlyPremium" className="text-sm font-medium w-32 shrink-0">
                   보험료 <span className="text-destructive">*</span>
                 </Label>
@@ -278,12 +278,12 @@ export function ApplicationForm() {
                   value={formData.yearlyPremium}
                   onChange={(e) => handleChange("yearlyPremium", e.target.value)}
                   required
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
               {/* 1회보험료 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label htmlFor="firstPremium" className="text-sm font-medium w-32 shrink-0">
                   1회보험료 <span className="text-destructive">*</span>
                 </Label>
@@ -293,7 +293,7 @@ export function ApplicationForm() {
                   value={formData.firstPremium}
                   onChange={(e) => handleChange("firstPremium", e.target.value)}
                   required
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
@@ -304,8 +304,8 @@ export function ApplicationForm() {
               </div>
 
               {/* 주소 */}
-              <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-4">
-                <Label htmlFor="address" className="text-sm font-medium w-32 shrink-0 sm:pt-2">
+              <div className="flex flex-row items-start gap-2 sm:gap-4">
+                <Label htmlFor="address" className="text-sm font-medium w-32 shrink-0 pt-2">
                   주소 <span className="text-destructive">*</span>
                 </Label>
                 <div className="flex-1 space-y-2">
@@ -315,14 +315,14 @@ export function ApplicationForm() {
                     value={formData.address}
                     onChange={(e) => handleChange("address", e.target.value)}
                     required
-                    className="h-10"
+                    className="h-10 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                   />
                   <Input
                     id="addressDetail"
                     placeholder="상세 주소"
                     value={formData.addressDetail}
                     onChange={(e) => handleChange("addressDetail", e.target.value)}
-                    className="h-10"
+                    className="h-10 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                   />
                 </div>
               </div>
@@ -345,7 +345,7 @@ export function ApplicationForm() {
                   <p className="text-sm font-medium text-foreground">계약자 정보</p>
                   
                   {/* 계약자 성명 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  <div className="flex flex-row items-center gap-2 sm:gap-4">
                     <Label htmlFor="contractorName" className="text-sm font-medium w-32 shrink-0">
                       성명 <span className="text-destructive">*</span>
                     </Label>
@@ -355,12 +355,12 @@ export function ApplicationForm() {
                       value={formData.contractorName}
                       onChange={(e) => handleChange("contractorName", e.target.value)}
                       required
-                      className="h-10 flex-1"
+                      className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                     />
                   </div>
 
                   {/* 계약자 주민번호 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  <div className="flex flex-row items-center gap-2 sm:gap-4">
                     <Label className="text-sm font-medium w-32 shrink-0">
                       주민번호 <span className="text-destructive">*</span>
                     </Label>
@@ -371,7 +371,7 @@ export function ApplicationForm() {
                         value={formData.contractorResidentNumber1}
                         onChange={(e) => handleChange("contractorResidentNumber1", e.target.value.replace(/\D/g, ""))}
                         required
-                        className="h-10 flex-1"
+                        className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                       />
                       <span className="text-muted-foreground">-</span>
                       <Input
@@ -381,7 +381,7 @@ export function ApplicationForm() {
                         value={formData.contractorResidentNumber2}
                         onChange={(e) => handleChange("contractorResidentNumber2", e.target.value.replace(/\D/g, ""))}
                         required
-                        className="h-10 flex-1"
+                        className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                       />
                     </div>
                   </div>
@@ -389,7 +389,7 @@ export function ApplicationForm() {
               )}
 
               {/* 은행 계좌 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label className="text-sm font-medium w-32 shrink-0">
                   은행명 <span className="text-destructive">*</span>
                 </Label>
@@ -398,11 +398,11 @@ export function ApplicationForm() {
                   value={formData.bankName}
                   onChange={(e) => handleChange("bankName", e.target.value)}
                   required
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label className="text-sm font-medium w-32 shrink-0">
                   계좌번호 <span className="text-destructive">*</span>
                 </Label>
@@ -411,7 +411,7 @@ export function ApplicationForm() {
                   value={formData.accountNumber}
                   onChange={(e) => handleChange("accountNumber", e.target.value.replace(/\D/g, ""))}
                   required
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
@@ -421,7 +421,7 @@ export function ApplicationForm() {
               </div>
 
               {/* 카드번호 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label htmlFor="cardNumber" className="text-sm font-medium w-32 shrink-0">
                   카드번호
                 </Label>
@@ -430,12 +430,12 @@ export function ApplicationForm() {
                   placeholder="카드번호"
                   value={formData.cardNumber}
                   onChange={(e) => handleChange("cardNumber", e.target.value.replace(/\D/g, ""))}
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
               {/* 유효기간 */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <div className="flex flex-row items-center gap-2 sm:gap-4">
                 <Label htmlFor="cardExpiry" className="text-sm font-medium w-32 shrink-0">
                   유효기간
                 </Label>
@@ -444,7 +444,7 @@ export function ApplicationForm() {
                   placeholder="MM/YY"
                   value={formData.cardExpiry}
                   onChange={(e) => handleChange("cardExpiry", e.target.value)}
-                  className="h-10 flex-1"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 

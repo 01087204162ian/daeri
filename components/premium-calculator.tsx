@@ -177,27 +177,94 @@ export default function PremiumCalculator() {
 						</div>
 					</div>
 
-					{/* Table */}
-					<div className="overflow-x-auto -mx-4 sm:mx-0">
-						<table className="w-full text-xs sm:text-sm min-w-[600px]">
+					{/* 모바일: 카드 형식 */}
+					<div className="lg:hidden p-4 space-y-4">
+						{ageGroups.map((age, index) => {
+							const premiums = getCurrentPremiums();
+							const basePremium = calculated
+								? Number.parseInt(premiums[index].replace(",", ""))
+								: 0;
+
+							return (
+								<div
+									key={age.label}
+									className="bg-muted/30 rounded-lg p-4 space-y-3"
+								>
+									<div className="border-b border-border pb-2">
+										<div className="text-primary font-bold text-base">
+											{age.label}
+										</div>
+										<div className="text-muted-foreground text-xs mt-1">
+											{age.range}
+										</div>
+									</div>
+
+									<div className="space-y-2">
+										<div className="flex justify-between items-center">
+											<span className="text-sm font-medium text-foreground">대리</span>
+											<span className="text-sm font-semibold text-accent">
+												{calculated ? `${premiums[index]}원` : "-"}
+											</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm font-medium text-foreground">일반탁송</span>
+											<span className="text-sm font-semibold text-accent">
+												{calculated
+													? `${Math.round(basePremium * 1.1).toLocaleString()}원`
+													: "-"}
+											</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm font-medium text-foreground">확대탁송</span>
+											<span className="text-sm font-semibold text-accent">
+												{calculated
+													? `${Math.round(basePremium * 1.25).toLocaleString()}원`
+													: "-"}
+											</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm font-medium text-foreground">대리+탁송</span>
+											<span className="text-sm font-semibold text-accent">
+												{calculated
+													? `${Math.round(basePremium * 1.8).toLocaleString()}원`
+													: "-"}
+											</span>
+										</div>
+										<div className="flex justify-between items-center">
+											<span className="text-sm font-medium text-foreground">대리+확대</span>
+											<span className="text-sm font-semibold text-accent">
+												{calculated
+													? `${Math.round(basePremium * 2.0).toLocaleString()}원`
+													: "-"}
+											</span>
+										</div>
+									</div>
+								</div>
+							);
+						})}
+					</div>
+
+					{/* 데스크톱: 테이블 형식 */}
+					<div className="hidden lg:block overflow-x-auto">
+						<table className="w-full text-sm">
 							<thead>
 								<tr className="bg-secondary border-b border-border">
-									<th className="w-[16%] px-1 sm:px-2 py-2 sm:py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
+									<th className="w-[16%] px-2 py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
 										년령
 									</th>
-									<th className="w-[14%] px-1 sm:px-2 py-2 sm:py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
+									<th className="w-[14%] px-2 py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
 										대리
 									</th>
-									<th className="w-[14%] px-1 sm:px-2 py-2 sm:py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
+									<th className="w-[14%] px-2 py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
 										일반탁송
 									</th>
-									<th className="w-[14%] px-1 sm:px-2 py-2 sm:py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
+									<th className="w-[14%] px-2 py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
 										확대탁송
 									</th>
-									<th className="w-[14%] px-1 sm:px-2 py-2 sm:py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
+									<th className="w-[14%] px-2 py-3 text-center font-semibold text-foreground border-r border-border whitespace-nowrap">
 										대리+탁송
 									</th>
-									<th className="w-[14%] px-1 sm:px-2 py-2 sm:py-3 text-center font-semibold text-foreground whitespace-nowrap">
+									<th className="w-[14%] px-2 py-3 text-center font-semibold text-foreground whitespace-nowrap">
 										대리+확대
 									</th>
 								</tr>
@@ -214,35 +281,35 @@ export default function PremiumCalculator() {
 											key={age.label}
 											className="border-b border-border hover:bg-muted/50 transition-colors"
 										>
-											<td className="px-1 sm:px-2 py-2 sm:py-4 border-r border-border">
+											<td className="px-2 py-4 border-r border-border">
 												<div className="text-center">
-													<span className="text-primary font-semibold block text-xs sm:text-sm">
+													<span className="text-primary font-semibold block text-sm">
 														{age.label}
 													</span>
-													<span className="text-muted-foreground text-[10px] sm:text-xs hidden sm:block">
+													<span className="text-muted-foreground text-xs">
 														{age.range}
 													</span>
 												</div>
 											</td>
-											<td className="px-1 sm:px-2 py-2 sm:py-4 text-center border-r border-border font-medium text-foreground">
+											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
 												{calculated ? `${premiums[index]}원` : "-"}
 											</td>
-											<td className="px-1 sm:px-2 py-2 sm:py-4 text-center border-r border-border font-medium text-foreground">
+											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
 												{calculated
 													? `${Math.round(basePremium * 1.1).toLocaleString()}원`
 													: "-"}
 											</td>
-											<td className="px-1 sm:px-2 py-2 sm:py-4 text-center border-r border-border font-medium text-foreground">
+											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
 												{calculated
 													? `${Math.round(basePremium * 1.25).toLocaleString()}원`
 													: "-"}
 											</td>
-											<td className="px-1 sm:px-2 py-2 sm:py-4 text-center border-r border-border font-medium text-foreground">
+											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
 												{calculated
 													? `${Math.round(basePremium * 1.8).toLocaleString()}원`
 													: "-"}
 											</td>
-											<td className="px-1 sm:px-2 py-2 sm:py-4 text-center font-medium text-foreground">
+											<td className="px-2 py-4 text-center font-medium text-foreground">
 												{calculated
 													? `${Math.round(basePremium * 2.0).toLocaleString()}원`
 													: "-"}

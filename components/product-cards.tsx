@@ -16,41 +16,109 @@ export function ProductCards() {
             보상하는 내용
           </h3>
           
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <table className="w-full text-xs sm:text-sm min-w-[500px]">
+          {/* 모바일: 카드 형식 */}
+          <div className="lg:hidden p-4 space-y-4">
+            <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+              <div className="font-bold text-primary text-base">대인배상</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">자동차 사고로 다른 사람을 죽게하거나 다치게 함으로써 입은 손해를 보상</div>
+              <div className="text-sm font-semibold text-accent mt-2">
+                <div>책임보험초과 무한</div>
+                <div>책임보험포함 무한</div>
+              </div>
+            </div>
+
+            <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+              <div className="font-bold text-primary text-base">대물배상</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">자동차 사고로 다른 사람의 재물에 입은 손해를 보상</div>
+              <div className="text-sm font-semibold text-accent mt-2">3천/5천/1억</div>
+            </div>
+
+            <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+              <div className="font-bold text-primary text-base">자기신체손해</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">자동차 사고로 운전자가 죽거나 다친 경우의 손해를 보상</div>
+              <div className="text-sm font-semibold text-accent mt-2 leading-relaxed">
+                <div>사망/후유장해/부상</div>
+                <div>3천만/3천만/1천5백만</div>
+                <div>5천만/5천만/1천5백만</div>
+                <div>1억/1억/1천5백만</div>
+              </div>
+            </div>
+
+            <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+              <div className="font-bold text-primary text-base">자기차량</div>
+              
+              <div className="space-y-3 pl-2 border-l-2 border-primary">
+                <div className="space-y-1">
+                  <div className="font-semibold text-foreground text-sm">자기부담금</div>
+                  <div className="text-xs text-muted-foreground">자기 차량 손해금 중에서 운전자가 부담해야할 금액</div>
+                  <div className="text-sm font-semibold text-accent mt-1">30만/50만</div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="font-semibold text-foreground text-sm">차대차</div>
+                  <div className="text-xs text-muted-foreground">자동차 사고로 인해 차량에 직접적으로 생긴 손해를 보상</div>
+                  <div className="text-sm font-semibold text-accent mt-1">1천만/2천만/3천만</div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="font-semibold text-foreground text-sm">차대차+기타</div>
+                  <div className="text-xs text-muted-foreground">자동차 사고로 인해 차량에 직접적으로 생긴 손해를 보상(단독사고 포함)</div>
+                  <div className="text-sm font-semibold text-accent mt-1">1천만/2천만/3천만</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+              <div className="font-bold text-primary text-base">벌금비용</div>
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                운전자가 대인사고를 야기한 경우 형사합의금, 방어비용, 벌금 지급
+                <span className="text-xs block mt-1">(벌금 담보 제외 가능)</span>
+              </div>
+              <div className="text-sm font-semibold text-accent mt-2 leading-relaxed">
+                <div>형사합의 지원금</div>
+                <div>사망1천만/부상2백만</div>
+                <div>방어비용: 2백만</div>
+                <div>벌금담보: 2천만</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 데스크톱: 테이블 형식 */}
+          <div className="hidden lg:block overflow-x-auto">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="bg-secondary">
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-foreground border border-border w-[80px] sm:w-[120px]">구분</th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-foreground border border-border">보상하는 내용</th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center font-semibold text-foreground border border-border w-[100px] sm:w-[160px]">가입금액</th>
+                  <th className="px-4 py-3 text-center font-semibold text-foreground border border-border w-[120px]">구분</th>
+                  <th className="px-4 py-3 text-left font-semibold text-foreground border border-border">보상하는 내용</th>
+                  <th className="px-4 py-3 text-center font-semibold text-foreground border border-border w-[160px]">가입금액</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center font-medium text-primary border border-border">대인배상</td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
+                  <td className="px-4 py-4 text-center font-medium text-primary border border-border">대인배상</td>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
                     자동차 사고로 다른 사람을 죽게하거나 다치게 함으로써 입은 손해를 보상
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center border border-border text-[10px] sm:text-xs">
+                  <td className="px-4 py-4 text-center border border-border">
                     <span className="text-accent font-semibold">책임보험초과 무한</span><br/>
                     <span className="text-accent font-semibold">책임보험포함 무한</span>
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center font-medium text-primary border border-border">대물배상</td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
+                  <td className="px-4 py-4 text-center font-medium text-primary border border-border">대물배상</td>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
                     자동차 사고로 다른 사람의 재물에 입은 손해를 보상
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center text-accent font-semibold border border-border">
+                  <td className="px-4 py-4 text-center text-accent font-semibold border border-border">
                     3천/5천/1억
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center font-medium text-primary border border-border">자기신체손해</td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
+                  <td className="px-4 py-4 text-center font-medium text-primary border border-border">자기신체손해</td>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
                     자동차 사고로 운전자가 죽거나 다친 경우의 손해를 보상
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center text-accent font-semibold border border-border text-[10px] sm:text-xs leading-relaxed">
+                  <td className="px-4 py-4 text-center text-accent font-semibold border border-border leading-relaxed">
                     사망/후유장해/부상<br/>
                     3천만/3천만/1천5백만<br/>
                     5천만/5천만/1천5백만<br/>
@@ -58,39 +126,37 @@ export function ProductCards() {
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td rowSpan={3} className="px-2 sm:px-4 py-2 sm:py-4 text-center font-medium text-primary border border-border align-middle">자기차량</td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
-                    <span className="font-medium text-foreground">자기부담금</span> <span className="hidden sm:inline">- 자기 차량 손해금 중에서 운전자가 부담해야할 금액</span>
+                  <td rowSpan={3} className="px-4 py-4 text-center font-medium text-primary border border-border align-middle">자기차량</td>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
+                    <span className="font-medium text-foreground">자기부담금</span> - 자기 차량 손해금 중에서 운전자가 부담해야할 금액
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center text-accent font-semibold border border-border">
+                  <td className="px-4 py-4 text-center text-accent font-semibold border border-border">
                     30만/50만
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
-                    <span className="font-medium text-foreground">차대차</span> <span className="hidden sm:inline">- 자동차 사고로 인해 차량에 직접적으로 생긴 손해를 보상</span>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
+                    <span className="font-medium text-foreground">차대차</span> - 자동차 사고로 인해 차량에 직접적으로 생긴 손해를 보상
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center text-accent font-semibold border border-border text-[10px] sm:text-xs">
+                  <td className="px-4 py-4 text-center text-accent font-semibold border border-border">
                     1천만/2천만/3천만
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
-                    <span className="font-medium text-foreground">차대차+기타</span> <span className="hidden sm:inline">- 자동차 사고로 인해 차량에 직접적으로 생긴 손해를 보상(단독사고 포함)</span>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
+                    <span className="font-medium text-foreground">차대차+기타</span> - 자동차 사고로 인해 차량에 직접적으로 생긴 손해를 보상(단독사고 포함)
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center text-accent font-semibold border border-border text-[10px] sm:text-xs">
+                  <td className="px-4 py-4 text-center text-accent font-semibold border border-border">
                     1천만/2천만/3천만
                   </td>
                 </tr>
                 <tr className="hover:bg-muted/30 transition-colors">
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center font-medium text-primary border border-border">벌금비용</td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-muted-foreground border border-border">
-                    <span className="hidden sm:inline">운전자가 대인사고를 야기한 경우 형사합의금, 방어비용, 벌금 지급</span>
-                    <span className="sm:hidden">형사합의금, 방어비용, 벌금</span>
-                    <br className="hidden sm:block"/>
-                    <span className="text-[10px] hidden sm:inline">(벌금 담보 제외 가능)</span>
+                  <td className="px-4 py-4 text-center font-medium text-primary border border-border">벌금비용</td>
+                  <td className="px-4 py-4 text-muted-foreground border border-border">
+                    운전자가 대인사고를 야기한 경우 형사합의금, 방어비용, 벌금 지급
+                    <span className="text-xs block mt-1">(벌금 담보 제외 가능)</span>
                   </td>
-                  <td className="px-2 sm:px-4 py-2 sm:py-4 text-center text-accent font-semibold border border-border text-[10px] sm:text-xs leading-relaxed">
+                  <td className="px-4 py-4 text-center text-accent font-semibold border border-border leading-relaxed">
                     형사합의 지원금<br/>
                     사망1천만/부상2백만<br/>
                     방어비용: 2백만<br/>
