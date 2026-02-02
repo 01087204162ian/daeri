@@ -19,6 +19,16 @@
     - 버전 관리: `effective_date`와 `expiry_date`로 기간별 관리
     - 새 보험료 적용 시 기존 데이터 삭제하지 말고 새 행 추가 권장
 
+### Supabase 프로젝트 정보 확인 방법
+1. **프로젝트 생성**: [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
+2. **프로젝트 URL 확인**: Settings > API > Project URL
+   - 형식: `https://[프로젝트ID].supabase.co`
+   - 예: `https://abcdefghijklmnop.supabase.co`
+   - 이 값이 `SUPABASE_URL` 환경변수로 사용됨
+3. **Service Role Key 확인**: Settings > API > Project API keys > `service_role` (secret)
+   - ⚠️ 주의: 이 키는 서버에서만 사용하며, 클라이언트에 노출되면 안 됨
+   - 이 값이 `SUPABASE_SERVICE_ROLE_KEY` 환경변수로 사용됨
+
 ## 3) 민감정보 저장(주민번호/계좌/카드)
 - **저장 전제**: PG 연동 없이 “접수”만 받고, 결제는 당사 직원이 보험사 전산에서 처리
 - **저장 방식**: 서버에서 필드 단위 암호화(AES-256-GCM) 후 DB 저장
@@ -65,6 +75,9 @@
 ## 7) 한 장 요약 체크리스트 (운영/배포)
 ### A. Supabase 준비
 - [ ] Supabase 프로젝트 생성
+  - [ ] [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
+  - [ ] 프로젝트 URL 확인: Settings > API > Project URL (`https://[프로젝트ID].supabase.co`)
+  - [ ] Service Role Key 확인: Settings > API > Project API keys > `service_role` (secret)
 - [ ] SQL Editor에서 `docs/supabase-schema.sql` 실행
   - 기본 테이블 생성 (partners, consultations, applications, application_secrets, message_logs)
   - 보험료 데이터 테이블 생성 (`premium_rates`)
@@ -81,8 +94,8 @@
   - [ ] `calculate_premium_total()` 함수 동작 확인
 
 ### B. Vercel 환경변수 설정
-- [ ] `SUPABASE_URL`
-- [ ] `SUPABASE_SERVICE_ROLE_KEY`
+- [ ] `SUPABASE_URL` (예: `https://[프로젝트ID].supabase.co`)
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` (Settings > API > service_role key)
 - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
 - [ ] `ALIGO_USER_ID`
 - [ ] `ALIGO_API_KEY`
@@ -116,8 +129,8 @@
 
 ### B. 로컬 환경변수 준비
 - `daeri/.env.local` 생성 후 아래 값 설정
-  - [ ] `SUPABASE_URL`
-  - [ ] `SUPABASE_SERVICE_ROLE_KEY`
+  - [ ] `SUPABASE_URL` (예: `https://[프로젝트ID].supabase.co`)
+  - [ ] `SUPABASE_SERVICE_ROLE_KEY` (Settings > API > service_role key)
   - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
   - [ ] `ALIGO_USER_ID`
   - [ ] `ALIGO_API_KEY`
