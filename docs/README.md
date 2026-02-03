@@ -73,36 +73,89 @@
 - `OPERATOR_PHONE` (담당자 수신번호)
 
 ## 7) 한 장 요약 체크리스트 (운영/배포)
+
+### 진행 상황 (2026-02-02)
+
+#### ✅ 완료된 작업
+- [x] **A. Supabase 준비** - 완료
+  - [x] Supabase 프로젝트 생성 완료
+  - [x] 프로젝트 URL 확인 완료
+  - [x] Service Role Key 확인 완료
+  - [x] SQL Editor에서 `docs/supabase-schema.sql` 실행 완료
+  - [x] 테이블 생성 확인 완료 (partners, consultations, applications, application_secrets, message_logs, premium_rates)
+  - [x] `partners` 테이블에 기본 파트너 'default' 1개 행 확인 완료
+  - [x] `premium_rates` 테이블에 12개 행 확인 완료 (대리 6개 + 탁송 6개)
+  - [x] `get_premium_rate()` 함수 테스트 완료 (정상 동작 확인)
+  - [x] `calculate_premium_total()` 함수 테스트 완료 (정상 동작 확인, 예: 990,900원 계산 결과 확인)
+
+#### 📋 다음 작업 (내일 진행 예정)
+- [ ] **B. Vercel 환경변수 설정** - 진행 예정
+  - [ ] Vercel 프로젝트 생성/연결 (GitHub 저장소 연결)
+  - [ ] 환경변수 추가 (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 등)
+  - [ ] 재배포
+- [ ] **C. 도메인/테넌트 라우팅** - 대기 중
+- [ ] **D. 기능 동작 확인** - 대기 중
+
+#### 📝 참고사항
+- Supabase 프로젝트 정보는 Settings > API에서 확인 가능
+- GitHub에 daeri 프로젝트 코드가 이미 올라가 있음
+- Vercel 환경변수 설정 방법은 아래 B-1 ~ B-4 섹션 참고
+
+---
+
 ### A. Supabase 준비
-- [ ] Supabase 프로젝트 생성
-  - [ ] [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
-  - [ ] 프로젝트 URL 확인: Settings > API > Project URL (`https://[프로젝트ID].supabase.co`)
-  - [ ] Service Role Key 확인: Settings > API > Project API keys > `service_role` (secret)
-- [ ] SQL Editor에서 `docs/supabase-schema.sql` 실행
-  - 기본 테이블 생성 (partners, consultations, applications, application_secrets, message_logs)
-  - 보험료 데이터 테이블 생성 (`premium_rates`)
-  - 보험료 데이터 초기 삽입 (대리/탁송, 6개 나이대별, 12개 담보별)
-  - 보험료 조회 함수 및 계산 함수 생성
+- [x] Supabase 프로젝트 생성
+  - [x] [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
+  - [x] 프로젝트 URL 확인: Settings > API > Project URL (`https://[프로젝트ID].supabase.co`)
+  - [x] Service Role Key 확인: Settings > API > Project API keys > `service_role` (secret)
+- [x] SQL Editor에서 `docs/supabase-schema.sql` 실행
+  - [x] 기본 테이블 생성 (partners, consultations, applications, application_secrets, message_logs)
+  - [x] 보험료 데이터 테이블 생성 (`premium_rates`)
+  - [x] 보험료 데이터 초기 삽입 (대리/탁송, 6개 나이대별, 12개 담보별)
+  - [x] 보험료 조회 함수 및 계산 함수 생성
 - [ ] `partners`에 테넌트 추가
-  - [ ] `default`
+  - [x] `default` (스키마 실행 시 자동 생성됨)
   - [ ] `kakao`
   - [ ] `tmap`
   - [ ] 기타 파트너(`cnmp`, `logi` 등)
-- [ ] 보험료 데이터 확인
-  - [ ] `premium_rates` 테이블에 12개 행 삽입 확인 (대리 6개 + 탁송 6개)
-  - [ ] `get_premium_rate()` 함수 동작 확인
-  - [ ] `calculate_premium_total()` 함수 동작 확인
+- [x] 보험료 데이터 확인
+  - [x] `premium_rates` 테이블에 12개 행 삽입 확인 (대리 6개 + 탁송 6개)
+  - [x] `get_premium_rate()` 함수 동작 확인
+  - [x] `calculate_premium_total()` 함수 동작 확인
 
 ### B. Vercel 환경변수 설정
+
+#### B-1. Vercel 프로젝트 준비
+- [ ] Vercel 계정 확인/생성: https://vercel.com
+- [ ] GitHub 저장소 연결 확인 (daeri 프로젝트가 GitHub에 있어야 함)
+- [ ] Vercel에 프로젝트 추가: "Add New..." → "Project" → GitHub 저장소 선택 → "Deploy"
+
+#### B-2. 환경변수 설정 화면 열기
+1. Vercel 프로젝트 페이지에서 "Settings" 클릭
+2. 왼쪽 메뉴에서 "Environment Variables" 클릭
+
+#### B-3. 환경변수 추가하기
+각 환경변수를 하나씩 추가합니다:
+- "Add New" 버튼 클릭
+- Key와 Value 입력
+- Environments 선택 (Production, Preview, Development 모두 체크 권장)
+- "Save" 클릭
+
+필수 환경변수:
 - [ ] `SUPABASE_URL` (예: `https://[프로젝트ID].supabase.co`)
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` (Settings > API > service_role key)
-- [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
-- [ ] `ALIGO_USER_ID`
-- [ ] `ALIGO_API_KEY`
-- [ ] `ALIGO_SENDER`
-- [ ] `ALIGO_SMS_URL`
-- [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시)
-- [ ] `OPERATOR_PHONE`
+- [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes) - 생성 필요
+- [ ] `ALIGO_USER_ID` (알리고 계정 정보)
+- [ ] `ALIGO_API_KEY` (알리고 계정 정보)
+- [ ] `ALIGO_SENDER` (발신번호)
+- [ ] `ALIGO_SMS_URL` (알리고 SMS 엔드포인트)
+- [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시, 알리고 카카오톡 엔드포인트)
+- [ ] `OPERATOR_PHONE` (담당자 수신번호)
+
+#### B-4. 환경변수 추가 후 재배포
+- [ ] "Deployments" 탭 클릭
+- [ ] 가장 최근 배포의 "..." 메뉴 → "Redeploy" 클릭
+- [ ] 재배포 완료 대기
 
 ### C. 도메인/테넌트 라우팅
 - [ ] Vercel 프로젝트에 `daeri-site.com` 도메인 연결
