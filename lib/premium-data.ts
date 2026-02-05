@@ -3,7 +3,7 @@
  * 보험종목별, 나이대별, 담보별 보험료 정보
  */
 
-export type InsuranceType = "대리" | "탁송";
+export type InsuranceType = "대리" | "탁송" | "확대탁송";
 export type AgeGroup = "26~30" | "31~45" | "46~50" | "51~55" | "56~60" | "61~";
 export type CoverageType =
   | "대인2"

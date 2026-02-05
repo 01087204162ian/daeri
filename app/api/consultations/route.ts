@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { ConsultationSchema } from "@/lib/validators";
 import { getPartnerContext } from "@/app/api/_lib/context";
-import { supabaseAdmin } from "@/lib/supabase-server";
+import { query, queryOne } from "@/lib/mysql";
 import { aligoSendSms } from "@/lib/aligo";
+import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
 
@@ -21,24 +22,24 @@ export async function POST(req: Request) {
     }
 
     const { partner, ip, userAgent } = await getPartnerContext();
-    const supabase = supabaseAdmin();
+    const consultationId = randomUUID();
 
-    const { data: row, error } = await supabase
-      .from("consultations")
-      .insert({
-        partner_id: partner.id,
-        name: parsed.data.name,
-        phone: parsed.data.phone,
-        service_type: parsed.data.serviceType ?? null,
-        message: parsed.data.message ?? null,
-        consent_privacy: parsed.data.consentPrivacy,
+    // 상담신청 저장
+    await query(
+      `INSERT INTO consultations (id, partner_id, name, phone, service_type, message, consent_privacy, ip, user_agent)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        consultationId,
+        partner.id,
+        parsed.data.name,
+        parsed.data.phone,
+        parsed.data.serviceType ?? null,
+        parsed.data.message ?? null,
+        parsed.data.consentPrivacy,
         ip,
-        user_agent: userAgent,
-      })
-      .select("id")
-      .single();
-
-    if (error) throw new Error(error.message);
+        userAgent,
+      ]
+    );
 
     // Notify operator (SMS)
     const operatorPhone = process.env.OPERATOR_PHONE;
@@ -46,18 +47,24 @@ export async function POST(req: Request) {
       const text = `[daeri][${partner.code}] 상담신청\n이름:${parsed.data.name}\n전화:${parsed.data.phone}\n유형:${parsed.data.serviceType ?? "-"}\n내용:${(parsed.data.message ?? "-").slice(0, 1000)}`;
       const smsResult = await aligoSendSms({ to: operatorPhone, text });
 
-      await supabase.from("message_logs").insert({
-        partner_id: partner.id,
-        entity_type: "consultation",
-        entity_id: row.id,
-        channel: "sms",
-        to_phone: operatorPhone,
-        status: smsResult.ok ? "success" : "error",
-        vendor_response: smsResult.ok ? smsResult.raw : { error: smsResult.error, raw: smsResult.raw },
-      });
+      // 발송 로그 저장
+      await query(
+        `INSERT INTO message_logs (id, partner_id, entity_type, entity_id, channel, to_phone, status, vendor_response)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          randomUUID(),
+          partner.id,
+          "consultation",
+          consultationId,
+          "sms",
+          operatorPhone,
+          smsResult.ok ? "success" : "error",
+          JSON.stringify(smsResult.ok ? smsResult.raw : { error: smsResult.error, raw: smsResult.raw }),
+        ]
+      );
     }
 
-    return NextResponse.json({ ok: true, id: row.id });
+    return NextResponse.json({ ok: true, id: consultationId });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "UNKNOWN";
     return NextResponse.json({ ok: false, error: "SERVER_ERROR", message: msg }, { status: 500 });

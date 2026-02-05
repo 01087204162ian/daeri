@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { supabaseAdmin } from "@/lib/supabase-server";
+import { queryOne } from "@/lib/mysql";
 import { getPartnerCodeFromHost } from "@/lib/partner";
 
 export type PartnerRow = { id: string; code: string; name: string };
@@ -16,15 +16,14 @@ export async function getPartnerContext(): Promise<{
   const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
   const userAgent = h.get("user-agent");
 
-  const supabase = supabaseAdmin();
-  const { data: partner, error } = await supabase
-    .from("partners")
-    .select("id, code, name")
-    .eq("code", partnerCode)
-    .maybeSingle();
+  const partner = await queryOne<PartnerRow>(
+    "SELECT id, code, name FROM partners WHERE code = ? LIMIT 1",
+    [partnerCode]
+  );
 
-  if (error) throw new Error(`Partner lookup failed: ${error.message}`);
-  if (!partner) throw new Error(`Unknown partner_code: ${partnerCode}`);
+  if (!partner) {
+    throw new Error(`Unknown partner_code: ${partnerCode}`);
+  }
 
   return { partner, partnerCode, ip, userAgent };
 }

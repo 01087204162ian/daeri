@@ -6,8 +6,8 @@
 - **테넌트 매핑**: 요청 `Host`에서 서브도메인을 추출해 `partners.code`로 매핑
   - 구현: `lib/partner.ts`, `app/api/_lib/context.ts`
 
-## 2) Supabase(DB)
-- **스키마**: `docs/supabase-schema.sql`
+## 2) MySQL 데이터베이스
+- **스키마**: `docs/mysql-schema.sql`
 - **필수 테이블**
   - `partners` - 파트너(테넌트) 정보
   - `consultations` - 상담신청
@@ -15,19 +15,31 @@
   - `application_secrets` - 가입신청 민감정보 (암호문 저장)
   - `message_logs` - 발송 로그
   - `premium_rates` - 보험료 데이터 (보험종목별, 나이대별, 담보별)
+    - **보험종목**: 대리, 탁송, 확대탁송
     - **주의**: 보험료는 보험사 정책 변경에 따라 추가/수정될 수 있음
     - 버전 관리: `effective_date`와 `expiry_date`로 기간별 관리
     - 새 보험료 적용 시 기존 데이터 삭제하지 말고 새 행 추가 권장
 
-### Supabase 프로젝트 정보 확인 방법
-1. **프로젝트 생성**: [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
-2. **프로젝트 URL 확인**: Settings > API > Project URL
-   - 형식: `https://[프로젝트ID].supabase.co`
-   - 예: `https://abcdefghijklmnop.supabase.co`
-   - 이 값이 `SUPABASE_URL` 환경변수로 사용됨
-3. **Service Role Key 확인**: Settings > API > Project API keys > `service_role` (secret)
-   - ⚠️ 주의: 이 키는 서버에서만 사용하며, 클라이언트에 노출되면 안 됨
-   - 이 값이 `SUPABASE_SERVICE_ROLE_KEY` 환경변수로 사용됨
+### MySQL 설정
+- **연결 라이브러리**: `lib/mysql.ts`
+- **환경변수**:
+  - `MYSQL_HOST` - MySQL 호스트 (기본값: localhost)
+  - `MYSQL_PORT` - MySQL 포트 (기본값: 3306)
+  - `MYSQL_USER` - MySQL 사용자명
+  - `MYSQL_PASSWORD` - MySQL 비밀번호
+  - `MYSQL_DATABASE` - 데이터베이스명 (기본값: daeri_db)
+
+### 데이터베이스 초기화
+```bash
+# MySQL 접속
+mysql -u root -p
+
+# 데이터베이스 생성
+CREATE DATABASE daeri_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# 스키마 실행
+mysql -u root -p daeri_db < docs/mysql-schema.sql
+```
 
 ## 3) 민감정보 저장(주민번호/계좌/카드)
 - **저장 전제**: PG 연동 없이 “접수”만 받고, 결제는 당사 직원이 보험사 전산에서 처리
@@ -54,10 +66,13 @@
   - 저장: `applications` + `application_secrets`
   - 알림/로그 동일
 
-## 6) 환경변수(Vercel)
-### Supabase
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
+## 6) 환경변수
+### MySQL
+- `MYSQL_HOST` (기본값: localhost)
+- `MYSQL_PORT` (기본값: 3306)
+- `MYSQL_USER` (필수)
+- `MYSQL_PASSWORD` (필수)
+- `MYSQL_DATABASE` (기본값: daeri_db)
 
 ### 암호화
 - `FIELD_ENCRYPTION_KEY` (base64 32 bytes)

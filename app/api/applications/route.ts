@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { ApplicationSchema } from "@/lib/validators";
 import { getPartnerContext } from "@/app/api/_lib/context";
-import { supabaseAdmin } from "@/lib/supabase-server";
+import { query } from "@/lib/mysql";
 import { encryptField } from "@/lib/crypto";
 import { aligoSendSms } from "@/lib/aligo";
+import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
 
@@ -22,7 +23,6 @@ export async function POST(req: Request) {
     }
 
     const { partner, ip, userAgent } = await getPartnerContext();
-    const supabase = supabaseAdmin();
 
     if (!parsed.data.isSamePerson) {
       if (!parsed.data.contractorName) {
@@ -33,63 +33,75 @@ export async function POST(req: Request) {
       }
     }
 
-    const { data: appRow, error: appErr } = await supabase
-      .from("applications")
-      .insert({
-        partner_id: partner.id,
-        insurance_type: parsed.data.insuranceType,
-        name: parsed.data.name,
-        phone: parsed.data.phone,
-        yearly_premium: parsed.data.yearlyPremium ?? null,
-        first_premium: parsed.data.firstPremium ?? null,
-        address: parsed.data.address,
-        address_detail: parsed.data.addressDetail ?? null,
-        is_same_person: parsed.data.isSamePerson,
-        contractor_name: parsed.data.isSamePerson ? null : parsed.data.contractorName ?? null,
-        bank_name: parsed.data.bankName,
-        consent_privacy: parsed.data.consentPrivacy,
+    const applicationId = randomUUID();
+
+    // 가입신청 저장
+    await query(
+      `INSERT INTO applications (id, partner_id, insurance_type, name, phone, yearly_premium, first_premium, address, address_detail, is_same_person, contractor_name, bank_name, consent_privacy, ip, user_agent)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        applicationId,
+        partner.id,
+        parsed.data.insuranceType,
+        parsed.data.name,
+        parsed.data.phone,
+        parsed.data.yearlyPremium ?? null,
+        parsed.data.firstPremium ?? null,
+        parsed.data.address,
+        parsed.data.addressDetail ?? null,
+        parsed.data.isSamePerson,
+        parsed.data.isSamePerson ? null : parsed.data.contractorName ?? null,
+        parsed.data.bankName,
+        parsed.data.consentPrivacy,
         ip,
-        user_agent: userAgent,
-      })
-      .select("id")
-      .single();
+        userAgent,
+      ]
+    );
 
-    if (appErr) throw new Error(appErr.message);
-
+    // 민감정보 암호화 저장
     const residentEnc = encryptField(`${parsed.data.residentNumber1}-${parsed.data.residentNumber2}`);
     const contractorResidentEnc =
       !parsed.data.isSamePerson && parsed.data.contractorResidentNumber1 && parsed.data.contractorResidentNumber2
         ? encryptField(`${parsed.data.contractorResidentNumber1}-${parsed.data.contractorResidentNumber2}`)
-        : "";
+        : null;
 
-    const { error: secErr } = await supabase.from("application_secrets").insert({
-      application_id: appRow.id,
-      resident_number_enc: residentEnc || null,
-      contractor_resident_number_enc: contractorResidentEnc || null,
-      account_number_enc: encryptField(parsed.data.accountNumber) || null,
-      card_number_enc: encryptField(parsed.data.cardNumber ?? "") || null,
-      card_expiry_enc: encryptField(parsed.data.cardExpiry ?? "") || null,
-    });
+    await query(
+      `INSERT INTO application_secrets (application_id, resident_number_enc, contractor_resident_number_enc, account_number_enc, card_number_enc, card_expiry_enc)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        applicationId,
+        residentEnc || null,
+        contractorResidentEnc || null,
+        encryptField(parsed.data.accountNumber) || null,
+        encryptField(parsed.data.cardNumber ?? "") || null,
+        encryptField(parsed.data.cardExpiry ?? "") || null,
+      ]
+    );
 
-    if (secErr) throw new Error(secErr.message);
-
+    // Notify operator (SMS)
     const operatorPhone = process.env.OPERATOR_PHONE;
     if (operatorPhone) {
       const text = `[daeri][${partner.code}] 가입신청\n이름:${parsed.data.name}\n전화:${parsed.data.phone}\n유형:${parsed.data.insuranceType}\n주소:${parsed.data.address} ${parsed.data.addressDetail ?? ""}\n보험료:${parsed.data.yearlyPremium ?? "-"} / 1회:${parsed.data.firstPremium ?? "-"}`;
       const smsResult = await aligoSendSms({ to: operatorPhone, text });
 
-      await supabase.from("message_logs").insert({
-        partner_id: partner.id,
-        entity_type: "application",
-        entity_id: appRow.id,
-        channel: "sms",
-        to_phone: operatorPhone,
-        status: smsResult.ok ? "success" : "error",
-        vendor_response: smsResult.ok ? smsResult.raw : { error: smsResult.error, raw: smsResult.raw },
-      });
+      // 발송 로그 저장
+      await query(
+        `INSERT INTO message_logs (id, partner_id, entity_type, entity_id, channel, to_phone, status, vendor_response)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          randomUUID(),
+          partner.id,
+          "application",
+          applicationId,
+          "sms",
+          operatorPhone,
+          smsResult.ok ? "success" : "error",
+          JSON.stringify(smsResult.ok ? smsResult.raw : { error: smsResult.error, raw: smsResult.raw }),
+        ]
+      );
     }
 
-    return NextResponse.json({ ok: true, id: appRow.id });
+    return NextResponse.json({ ok: true, id: applicationId });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "UNKNOWN";
     return NextResponse.json({ ok: false, error: "SERVER_ERROR", message: msg }, { status: 500 });
