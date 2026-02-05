@@ -50,11 +50,19 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 ## 4) 알림(알리고)
 웹 문서 확인 권한이 없는 환경에서도 동작하도록, **알리고 엔드포인트/파라미터는 환경변수로 분리**합니다.
 
+**방식 1: AWS Lambda 프록시 사용 (권장)**
+- Lambda 프록시를 통해 알리고 API 호출 (보안 강화)
+- 환경변수: `ALIGO_LAMBDA_URL` 설정
+- JSON 형식으로 요청 (`receiver`, `msg`, `testmode_yn`)
+- 구현: `lib/aligo.ts` → `aligoSendSms()` (자동으로 Lambda 프록시 사용)
+
+**방식 2: 직접 알리고 API 호출**
 - 문자(SMS): `ALIGO_SMS_URL`로 form POST
   - 구현: `lib/aligo.ts` → `aligoSendSms()`
 - 카카오(알림톡/친구톡): `ALIGO_KAKAO_URL`로 form POST
   - 구현: `lib/aligo.ts` → `aligoSendKakao()`
 
+> `ALIGO_LAMBDA_URL`이 설정되어 있으면 Lambda 프록시 방식을 우선 사용합니다.
 > 운영 계정 스펙에 따라 파라미터명이 다를 수 있어, 필요 시 `lib/aligo.ts`에서 매핑을 조정합니다.
 
 ## 5) API 엔드포인트(Next.js)
@@ -78,6 +86,12 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 - `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
 
 ### 알리고
+**방식 1: AWS Lambda 프록시 사용 (권장)**
+- `ALIGO_LAMBDA_URL` - Lambda 프록시 URL (예: `https://j7rqfprgb5.execute-api.ap-northeast-2.amazonaws.com/default/aligo-5962`)
+  - Lambda 프록시가 설정되어 있으면 이 방식 사용 (JSON 형식, 보안 강화)
+  - `ALIGO_LAMBDA_URL`이 설정되어 있으면 아래 환경변수 불필요
+
+**방식 2: 직접 알리고 API 호출**
 - `ALIGO_USER_ID`
 - `ALIGO_API_KEY`
 - `ALIGO_SENDER` (발신번호)
@@ -160,11 +174,12 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 - [ ] `SUPABASE_URL` (예: `https://[프로젝트ID].supabase.co`)
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` (Settings > API > service_role key)
 - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes) - 생성 필요
-- [ ] `ALIGO_USER_ID` (알리고 계정 정보)
-- [ ] `ALIGO_API_KEY` (알리고 계정 정보)
-- [ ] `ALIGO_SENDER` (발신번호)
-- [ ] `ALIGO_SMS_URL` (알리고 SMS 엔드포인트)
-- [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시, 알리고 카카오톡 엔드포인트)
+  - [ ] `ALIGO_LAMBDA_URL` (AWS Lambda 프록시 URL, 권장) 또는
+  - [ ] `ALIGO_USER_ID` (알리고 계정 정보, 직접 호출 시)
+  - [ ] `ALIGO_API_KEY` (알리고 계정 정보, 직접 호출 시)
+  - [ ] `ALIGO_SENDER` (발신번호, 직접 호출 시)
+  - [ ] `ALIGO_SMS_URL` (알리고 SMS 엔드포인트, 직접 호출 시)
+  - [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시, 알리고 카카오톡 엔드포인트)
 - [ ] `OPERATOR_PHONE` (담당자 수신번호)
 
 #### B-4. 환경변수 추가 후 재배포
@@ -208,11 +223,12 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
   - [ ] `MYSQL_PASSWORD` (MySQL root 비밀번호)
   - [ ] `MYSQL_DATABASE` (기본값: daeri_db)
   - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes) - `openssl rand -base64 32`로 생성
-  - [ ] `ALIGO_USER_ID`
-  - [ ] `ALIGO_API_KEY`
-  - [ ] `ALIGO_SENDER`
-  - [ ] `ALIGO_SMS_URL`
-  - [ ] `ALIGO_KAKAO_URL` (선택)
+  - [ ] `ALIGO_LAMBDA_URL` (AWS Lambda 프록시 URL, 권장) 또는
+  - [ ] `ALIGO_USER_ID` (알리고 계정 정보, 직접 호출 시)
+  - [ ] `ALIGO_API_KEY` (알리고 계정 정보, 직접 호출 시)
+  - [ ] `ALIGO_SENDER` (발신번호, 직접 호출 시)
+  - [ ] `ALIGO_SMS_URL` (알리고 SMS 엔드포인트, 직접 호출 시)
+  - [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시, 선택)
   - [ ] `OPERATOR_PHONE` (선택: 설정 시 발송 시도)
 
 ### C. 개발 서버 실행

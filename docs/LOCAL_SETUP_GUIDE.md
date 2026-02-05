@@ -248,12 +248,18 @@ MYSQL_DATABASE=daeri_db
 # 아래 명령어로 생성 가능: openssl rand -base64 32
 FIELD_ENCRYPTION_KEY=여기에_32바이트_base64_키_입력
 
-# 알리고 설정 (실제 값으로 변경 필요)
-ALIGO_USER_ID=알리고_사용자ID
-ALIGO_API_KEY=알리고_API키
-ALIGO_SENDER=발신번호
-ALIGO_SMS_URL=https://apis.aligo.in/send/
-ALIGO_KAKAO_URL=https://apis.aligo.in/akv10/friend/1/1/
+# 알리고 설정
+# 방식 1: AWS Lambda 프록시 사용 (권장, 보안 강화)
+# Lambda 프록시 URL이 있으면 아래 ALIGO_LAMBDA_URL만 설정하면 됩니다
+ALIGO_LAMBDA_URL=https://j7rqfprgb5.execute-api.ap-northeast-2.amazonaws.com/default/aligo-5962
+
+# 방식 2: 직접 알리고 API 호출 (ALIGO_LAMBDA_URL이 없을 때 사용)
+# ALIGO_LAMBDA_URL이 설정되어 있으면 아래 환경변수는 불필요합니다
+# ALIGO_USER_ID=알리고_사용자ID
+# ALIGO_API_KEY=알리고_API키
+# ALIGO_SENDER=발신번호
+# ALIGO_SMS_URL=https://apis.aligo.in/send/
+# ALIGO_KAKAO_URL=https://apis.aligo.in/akv10/friend/1/1/
 
 # 운영 수신처 (선택사항, 테스트 시에는 비워둬도 됨)
 OPERATOR_PHONE=

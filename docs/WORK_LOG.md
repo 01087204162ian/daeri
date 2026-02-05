@@ -141,3 +141,82 @@
 - ✅ 빌드 성공 확인
 
 ---
+
+## 2026-02-02 (알리고 Lambda 프록시 방식 적용)
+
+### 작업 내용: pci0327 알리고 SMS Lambda 프록시 방식 적용
+
+#### 완료된 작업
+
+1. **알리고 SMS 전송 방식 개선**
+   - AWS Lambda 프록시 방식 추가 (pci0327 프로젝트 방식 적용)
+   - 기존 직접 호출 방식 유지 (하위 호환성 보장)
+   - `ALIGO_LAMBDA_URL` 환경변수 설정 시 자동으로 Lambda 프록시 사용
+   - JSON 형식으로 요청 (보안 강화)
+   - `testmode` 옵션 추가
+
+2. **코드 변경**
+   - `lib/aligo.ts`:
+     - `postJson()` 함수 추가 (Lambda 프록시용 JSON 요청)
+     - `aligoSendSms()` 함수 수정:
+       - `ALIGO_LAMBDA_URL` 환경변수 확인
+       - Lambda 프록시 사용 시: JSON 형식 (`receiver`, `msg`, `testmode_yn`)
+       - 직접 호출 시: 기존 Form data 형식 유지
+     - `testmode` 파라미터 추가
+
+3. **문서 업데이트**
+   - `docs/README.md`:
+     - 알리고 섹션에 Lambda 프록시 방식 설명 추가
+     - 환경변수 섹션에 `ALIGO_LAMBDA_URL` 추가
+     - Vercel 배포 가이드에 Lambda 프록시 환경변수 추가
+   - `docs/LOCAL_SETUP_GUIDE.md`:
+     - 환경변수 설정 가이드에 Lambda 프록시 방식 추가
+     - pci0327 Lambda URL 예시 추가
+
+#### Lambda 프록시 방식의 장점
+
+1. **보안 강화**
+   - API 키가 Lambda에만 저장되어 노출 위험 감소
+   - 클라이언트 코드에 API 키 불필요
+
+2. **간단한 인터페이스**
+   - JSON 형식으로 요청
+   - 파라미터: `receiver`, `msg`, `testmode_yn`만 필요
+
+3. **테스트 모드 지원**
+   - `testmode: true` 옵션으로 테스트 전송 가능
+
+#### 사용 방법
+
+**방식 1: Lambda 프록시 사용 (권장)**
+```env
+ALIGO_LAMBDA_URL=https://j7rqfprgb5.execute-api.ap-northeast-2.amazonaws.com/default/aligo-5962
+```
+
+**방식 2: 직접 알리고 API 호출**
+```env
+ALIGO_USER_ID=...
+ALIGO_API_KEY=...
+ALIGO_SENDER=...
+ALIGO_SMS_URL=...
+```
+
+#### 동작 방식
+
+- `ALIGO_LAMBDA_URL`이 설정되어 있으면 → Lambda 프록시 사용
+- `ALIGO_LAMBDA_URL`이 없으면 → 기존 직접 호출 방식 사용
+- 기존 코드 수정 없이 자동으로 적절한 방식 선택
+
+#### 수정된 파일
+
+- `lib/aligo.ts` (수정)
+- `docs/README.md` (수정)
+- `docs/LOCAL_SETUP_GUIDE.md` (수정)
+
+#### 참고사항
+
+- pci0327 프로젝트의 Lambda 프록시 URL 사용 가능
+- 기존 코드와 완전히 호환됨 (하위 호환성 보장)
+- Lambda 프록시 사용 시 기존 알리고 환경변수 불필요
+
+---
