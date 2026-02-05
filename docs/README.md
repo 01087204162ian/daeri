@@ -189,17 +189,25 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 - [ ] 카드 결제는 PG 없이 “접수”만 받고, **보험사 전산에서 당사 직원이 결제 처리**
 
 ## 8) 로컬 테스트 방법
-### A. Supabase 준비
-- [ ] Supabase SQL Editor에서 `docs/supabase-schema.sql` 실행
+
+**📖 상세 가이드**: `docs/LOCAL_SETUP_GUIDE.md` 참고
+
+### A. MySQL 준비
+- [ ] MySQL 설치 완료
+- [ ] 데이터베이스 생성: `CREATE DATABASE daeri_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+- [ ] 스키마 실행: `mysql -u root -p daeri_db < docs/mysql-schema.sql`
 - [ ] `partners`에 최소 `default` 존재 확인 (seed 포함)
 - [ ] 로컬에서 서브도메인으로 테스트할 파트너가 있으면 `partners.code`로 추가
   - 예: `kakao`, `tmap`
 
 ### B. 로컬 환경변수 준비
 - `daeri/.env.local` 생성 후 아래 값 설정
-  - [ ] `SUPABASE_URL` (예: `https://[프로젝트ID].supabase.co`)
-  - [ ] `SUPABASE_SERVICE_ROLE_KEY` (Settings > API > service_role key)
-  - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes)
+  - [ ] `MYSQL_HOST` (기본값: localhost)
+  - [ ] `MYSQL_PORT` (기본값: 3306)
+  - [ ] `MYSQL_USER` (예: root)
+  - [ ] `MYSQL_PASSWORD` (MySQL root 비밀번호)
+  - [ ] `MYSQL_DATABASE` (기본값: daeri_db)
+  - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes) - `openssl rand -base64 32`로 생성
   - [ ] `ALIGO_USER_ID`
   - [ ] `ALIGO_API_KEY`
   - [ ] `ALIGO_SENDER`
@@ -250,8 +258,8 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
   - `http://tmap.daeri-site.com:3000`
 
 ### E. 제출 동작 확인 포인트
-- [ ] 상담신청 제출 → Supabase `consultations`에 row 생성
-- [ ] 가입신청 제출 → Supabase `applications` + `application_secrets`에 row 생성
+- [ ] 상담신청 제출 → MySQL `consultations`에 row 생성
+- [ ] 가입신청 제출 → MySQL `applications` + `application_secrets`에 row 생성
 - [ ] `OPERATOR_PHONE` 설정 시 → 문자 발송 시도 + `message_logs` 기록 확인
 
 ## 9) 빌드 방법
