@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { CheckCircle2, XCircle } from "lucide-react"
+import { validateResidentNumber } from "@/lib/resident-number"
 
 export function ApplicationForm() {
   const [formData, setFormData] = useState({
@@ -35,6 +36,13 @@ export function ApplicationForm() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [residentNumberError, setResidentNumberError] = useState<string | null>(null)
+  const [contractorResidentNumberError, setContractorResidentNumberError] = useState<string | null>(null)
+  const [isCalculatingPremium, setIsCalculatingPremium] = useState(false)
+  
+  // 주민번호 입력 필드 ref
+  const residentNumber2Ref = useRef<HTMLInputElement>(null)
+  const contractorResidentNumber2Ref = useRef<HTMLInputElement>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +68,136 @@ export function ApplicationForm() {
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  // 전화번호 자동 하이픈 추가 함수
+  const formatPhoneNumber = (value: string): string => {
+    // 숫자만 추출
+    const numbers = value.replace(/\D/g, "")
+    
+    // 길이에 따라 하이픈 추가
+    if (numbers.length <= 3) {
+      return numbers
+    } else if (numbers.length <= 7) {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`
+    } else if (numbers.length <= 11) {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7)}`
+    } else {
+      // 11자리 초과 시 11자리까지만
+      return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`
+    }
+  }
+
+  // 보험료 계산 함수 (재사용 가능하도록 분리)
+  const calculatePremium = async (residentNumber1: string, residentNumber2: string, insuranceType: string) => {
+    if (residentNumber1.length !== 6 || residentNumber2.length !== 7 || !insuranceType) {
+      return
+    }
+
+    // 주민번호 유효성 검사
+    const validation = validateResidentNumber(residentNumber1, residentNumber2)
+    
+    if (!validation.isValid) {
+      setResidentNumberError(validation.error || "주민번호가 올바르지 않습니다")
+      return
+    }
+
+    setResidentNumberError(null)
+
+    // 보험료 자동 계산
+    setIsCalculatingPremium(true)
+    try {
+      const res = await fetch("/api/calculate-premium", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          residentNumber1,
+          residentNumber2,
+          insuranceType,
+        }),
+      })
+
+      const data = await res.json()
+      if (data.ok && data.data?.premium) {
+        const premium = data.data.premium
+        // 기본 보험료 계산 (대인2 + 대물1억 + 자손5천 + 자차1천 + 법률비용)
+        const yearlyPremium = 
+          premium.daein2 +
+          premium.daemul_1억 +
+          premium.jason_5천 +
+          premium.jacha_1천 +
+          premium.legal_cost
+
+        // 1회차 보험료 (25%)
+        const firstPremium = Math.round(yearlyPremium * 0.25)
+
+        handleChange("yearlyPremium", yearlyPremium.toLocaleString())
+        handleChange("firstPremium", firstPremium.toLocaleString())
+      }
+    } catch (err) {
+      console.error("보험료 계산 실패:", err)
+    } finally {
+      setIsCalculatingPremium(false)
+    }
+  }
+
+  // 주민번호 유효성 검사 및 보험료 계산
+  const handleResidentNumberChange = async (field: "residentNumber1" | "residentNumber2", value: string) => {
+    // 숫자만 허용
+    const numbersOnly = value.replace(/\D/g, "")
+    handleChange(field, numbersOnly)
+
+    // 앞 6자리 입력 완료 시 자동으로 뒤 7자리 필드로 포커스 이동
+    if (field === "residentNumber1" && numbersOnly.length === 6) {
+      residentNumber2Ref.current?.focus()
+    }
+
+    // 두 필드가 모두 입력되었을 때만 검증
+    const front = field === "residentNumber1" ? numbersOnly : formData.residentNumber1
+    const back = field === "residentNumber2" ? numbersOnly : formData.residentNumber2
+
+    if (front.length === 6 && back.length === 7) {
+      await calculatePremium(front, back, formData.insuranceType)
+    } else {
+      setResidentNumberError(null)
+    }
+  }
+
+  // 계약자 주민번호 유효성 검사
+  const handleContractorResidentNumberChange = (field: "contractorResidentNumber1" | "contractorResidentNumber2", value: string) => {
+    // 숫자만 허용
+    const numbersOnly = value.replace(/\D/g, "")
+    handleChange(field, numbersOnly)
+
+    // 앞 6자리 입력 완료 시 자동으로 뒤 7자리 필드로 포커스 이동
+    if (field === "contractorResidentNumber1" && numbersOnly.length === 6) {
+      contractorResidentNumber2Ref.current?.focus()
+    }
+
+    // 두 필드가 모두 입력되었을 때만 검증
+    const front = field === "contractorResidentNumber1" ? numbersOnly : formData.contractorResidentNumber1
+    const back = field === "contractorResidentNumber2" ? numbersOnly : formData.contractorResidentNumber2
+
+    if (front.length === 6 && back.length === 7) {
+      const validation = validateResidentNumber(front, back)
+      if (!validation.isValid) {
+        setContractorResidentNumberError(validation.error || "주민번호가 올바르지 않습니다")
+      } else {
+        setContractorResidentNumberError(null)
+      }
+    } else {
+      setContractorResidentNumberError(null)
+    }
+  }
+
+  // 보험 유형 변경 핸들러
+  const handleInsuranceTypeChange = async (value: string) => {
+    handleChange("insuranceType", value)
+    
+    // 주민번호가 이미 입력되어 있으면 보험료 다시 계산
+    if (formData.residentNumber1.length === 6 && formData.residentNumber2.length === 7) {
+      await calculatePremium(formData.residentNumber1, formData.residentNumber2, value)
+    }
   }
 
   return (
@@ -195,7 +333,7 @@ export function ApplicationForm() {
                 <Label className="text-sm font-medium w-32 shrink-0">보험유형 <span className="text-destructive">*</span></Label>
                 <Select
                   value={formData.insuranceType}
-                  onValueChange={(value) => handleChange("insuranceType", value)}
+                  onValueChange={(value) => handleInsuranceTypeChange(value)}
                 >
                   <SelectTrigger className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus:border-primary focus:shadow-md">
                     <SelectValue placeholder="보험 유형 선택" />
@@ -232,38 +370,55 @@ export function ApplicationForm() {
                 </Label>
                 <Input
                   id="phone"
-                  placeholder="하이픈없이 핸드폰번호"
+                  placeholder="010-1234-5678"
                   value={formData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => {
+                    const formatted = formatPhoneNumber(e.target.value)
+                    handleChange("phone", formatted)
+                  }}
+                  maxLength={13}
                   required
                   className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
                 />
               </div>
 
               {/* 주민번호 */}
-              <div className="flex flex-row items-center gap-2 sm:gap-4">
-                <Label className="text-sm font-medium w-32 shrink-0">
+              <div className="flex flex-row items-start gap-2 sm:gap-4">
+                <Label className="text-sm font-medium w-32 shrink-0 pt-2">
                   주민번호 <span className="text-destructive">*</span>
                 </Label>
-                <div className="flex items-center gap-2 flex-1">
-                  <Input
-                    placeholder="앞 6자리"
-                    maxLength={6}
-                    value={formData.residentNumber1}
-                    onChange={(e) => handleChange("residentNumber1", e.target.value.replace(/\D/g, ""))}
-                    required
-                    className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
-                  />
-                  <span className="text-muted-foreground">-</span>
-                  <Input
-                    type="password"
-                    placeholder="뒤 7자리"
-                    maxLength={7}
-                    value={formData.residentNumber2}
-                    onChange={(e) => handleChange("residentNumber2", e.target.value.replace(/\D/g, ""))}
-                    required
-                    className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
-                  />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      placeholder="앞 6자리"
+                      maxLength={6}
+                      value={formData.residentNumber1}
+                      onChange={(e) => handleResidentNumberChange("residentNumber1", e.target.value)}
+                      required
+                      className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                    />
+                    <span className="text-muted-foreground">-</span>
+                    <Input
+                      ref={residentNumber2Ref}
+                      type="password"
+                      placeholder="뒤 7자리"
+                      maxLength={7}
+                      value={formData.residentNumber2}
+                      onChange={(e) => handleResidentNumberChange("residentNumber2", e.target.value)}
+                      required
+                      className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                    />
+                  </div>
+                  {residentNumberError && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {residentNumberError}
+                    </p>
+                  )}
+                  {isCalculatingPremium && (
+                    <p className="text-sm text-muted-foreground">
+                      보험료 계산 중...
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -274,11 +429,11 @@ export function ApplicationForm() {
                 </Label>
                 <Input
                   id="yearlyPremium"
-                  placeholder="년보험료"
+                  placeholder="년보험료 (주민번호 입력 시 자동 계산)"
                   value={formData.yearlyPremium}
-                  onChange={(e) => handleChange("yearlyPremium", e.target.value)}
+                  onChange={(e) => handleChange("yearlyPremium", e.target.value.replace(/[^0-9,]/g, ""))}
                   required
-                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md text-right"
                 />
               </div>
 
@@ -289,11 +444,11 @@ export function ApplicationForm() {
                 </Label>
                 <Input
                   id="firstPremium"
-                  placeholder="1회차보험료"
+                  placeholder="1회차보험료 (주민번호 입력 시 자동 계산)"
                   value={formData.firstPremium}
-                  onChange={(e) => handleChange("firstPremium", e.target.value)}
+                  onChange={(e) => handleChange("firstPremium", e.target.value.replace(/[^0-9,]/g, ""))}
                   required
-                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                  className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md text-right"
                 />
               </div>
 
@@ -360,29 +515,37 @@ export function ApplicationForm() {
                   </div>
 
                   {/* 계약자 주민번호 */}
-                  <div className="flex flex-row items-center gap-2 sm:gap-4">
-                    <Label className="text-sm font-medium w-32 shrink-0">
+                  <div className="flex flex-row items-start gap-2 sm:gap-4">
+                    <Label className="text-sm font-medium w-32 shrink-0 pt-2">
                       주민번호 <span className="text-destructive">*</span>
                     </Label>
-                    <div className="flex items-center gap-2 flex-1">
-                      <Input
-                        placeholder="앞 6자리"
-                        maxLength={6}
-                        value={formData.contractorResidentNumber1}
-                        onChange={(e) => handleChange("contractorResidentNumber1", e.target.value.replace(/\D/g, ""))}
-                        required
-                        className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
-                      />
-                      <span className="text-muted-foreground">-</span>
-                      <Input
-                        type="password"
-                        placeholder="뒤 7자리"
-                        maxLength={7}
-                        value={formData.contractorResidentNumber2}
-                        onChange={(e) => handleChange("contractorResidentNumber2", e.target.value.replace(/\D/g, ""))}
-                        required
-                        className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
-                      />
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          placeholder="앞 6자리"
+                          maxLength={6}
+                          value={formData.contractorResidentNumber1}
+                          onChange={(e) => handleContractorResidentNumberChange("contractorResidentNumber1", e.target.value)}
+                          required
+                          className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                        />
+                        <span className="text-muted-foreground">-</span>
+                        <Input
+                          ref={contractorResidentNumber2Ref}
+                          type="password"
+                          placeholder="뒤 7자리"
+                          maxLength={7}
+                          value={formData.contractorResidentNumber2}
+                          onChange={(e) => handleContractorResidentNumberChange("contractorResidentNumber2", e.target.value)}
+                          required
+                          className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                        />
+                      </div>
+                      {contractorResidentNumberError && (
+                        <p className="text-sm text-destructive" role="alert">
+                          {contractorResidentNumberError}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

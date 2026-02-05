@@ -2,8 +2,11 @@ import { z } from "zod";
 
 const phoneDigits = z
   .string()
-  .transform((v) => v.replace(/\D/g, ""))
-  .refine((v) => v.length >= 10 && v.length <= 11, "Invalid phone");
+  .refine((v) => {
+    // 하이픈 포함 또는 제외 모두 허용
+    const digitsOnly = v.replace(/\D/g, "");
+    return digitsOnly.length >= 10 && digitsOnly.length <= 11;
+  }, "Invalid phone");
 
 export const ConsultationSchema = z.object({
   name: z.string().min(1).max(50),
