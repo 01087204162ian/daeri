@@ -117,18 +117,42 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
   - [x] `get_premium_rate()` 함수 테스트 완료 (정상 동작 확인)
   - [x] `calculate_premium_total()` 함수 테스트 완료 (정상 동작 확인, 예: 990,900원 계산 결과 확인)
 
-#### 📋 다음 작업 (내일 진행 예정)
+- [x] **로컬 개발 환경 설정** - 완료
+  - [x] Windows 환경에서 `.env.local` 파일 생성 완료
+  - [x] MySQL 연결 정보 설정 (MYSQL_HOST, MYSQL_PORT, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE)
+  - [x] 암호화 키 생성 및 설정 (FIELD_ENCRYPTION_KEY)
+  - [x] 알리고 API 설정 템플릿 추가 (ALIGO_USER_ID, ALIGO_API_KEY, ALIGO_SENDER 등)
+  - [x] MySQL 데이터베이스에 `default` 파트너 추가 완료
+
+- [x] **가입신청 폼 UI/UX 개선** - 완료
+  - [x] 전화번호 입력 시 자동 하이픈 추가 기능 구현 (`formatPhoneNumber` 함수)
+  - [x] 주민번호 프론트엔드 유효성 검사 구현 (`validateResidentNumber` 함수, `lib/resident-number.ts`)
+  - [x] 주민번호 검증 후 서버와 통신하여 보험료 자동 계산 기능 구현 (`/api/calculate-premium` API)
+  - [x] 보험료 표시 필드 우측 정렬 적용 (`text-right` CSS 클래스)
+  - [x] 주민번호 앞 6자리 입력 시 자동으로 뒷자리로 포커스 이동 기능 구현 (`residentNumber2Ref`, `contractorResidentNumber2Ref`)
+  - [x] 계약자 주민번호 프론트엔드 유효성 검사 구현
+  - [x] 보험 유형 변경 시 주민번호가 입력된 상태라면 보험료 자동 재계산 기능 구현
+  - [x] 복합 보험 유형(대리+탁송, 대리+확대탁송) 보험료 계산 로직 수정 및 확인
+  - [x] 가입신청하기 버튼 API 연동 확인 완료
+  - [x] 가입신청 API 테스트 성공 (응답: `{"ok":true,"id":"1346bbd8-a6eb-43cc-a6db-7001befd398c"}`)
+
+#### 📋 다음 작업 (진행 예정)
 - [ ] **B. Vercel 환경변수 설정** - 진행 예정
   - [ ] Vercel 프로젝트 생성/연결 (GitHub 저장소 연결)
-  - [ ] 환경변수 추가 (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 등)
+  - [ ] 환경변수 추가 (MYSQL_*, FIELD_ENCRYPTION_KEY, ALIGO_* 등)
   - [ ] 재배포
 - [ ] **C. 도메인/테넌트 라우팅** - 대기 중
 - [ ] **D. 기능 동작 확인** - 대기 중
+  - [x] 가입신청 기능 로컬 테스트 완료
+  - [ ] 상담신청 기능 테스트
+  - [ ] 운영 환경 배포 후 전체 기능 테스트
 
 #### 📝 참고사항
 - Supabase 프로젝트 정보는 Settings > API에서 확인 가능
 - GitHub에 daeri 프로젝트 코드가 이미 올라가 있음
 - Vercel 환경변수 설정 방법은 아래 B-1 ~ B-4 섹션 참고
+- Windows 환경에서는 `.env.local` 파일을 각 개발 머신에 개별적으로 생성해야 함
+- MySQL 데이터베이스에 `default` 파트너가 없으면 "Unknown partner_code: default" 오류 발생
 
 ---
 
