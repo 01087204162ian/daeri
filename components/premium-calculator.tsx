@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -9,91 +9,112 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Play } from "lucide-react";
+import { Play, Info } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+	fetchPremiumRates,
+	calculateTotalPremium,
+	type AgeGroup,
+	type InsuranceType,
+	type PremiumData,
+} from "@/lib/premium-data-client";
 
-const ageGroups = [
-	{ label: "26세~30세", range: "[ 1995-01-21 ~ 2000-01-22 ]" },
-	{ label: "31세~45세", range: "[ 1980-01-21 ~ 1995-01-22 ]" },
-	{ label: "46세~50세", range: "[ 1975-01-21 ~ 1980-01-22 ]" },
-	{ label: "51세~55세", range: "[ 1970-01-21 ~ 1975-01-22 ]" },
-	{ label: "56세~60세", range: "[ 1965-01-21 ~ 1970-01-22 ]" },
-	{ label: "61세 이상", range: "[ ~ 1965-01-22 ]" },
+const ageGroups: Array<{ label: string; range: string; ageGroup: AgeGroup }> = [
+	{ label: "26세~30세", range: "[ 1995-01-21 ~ 2000-01-22 ]", ageGroup: "26~30" },
+	{ label: "31세~45세", range: "[ 1980-01-21 ~ 1995-01-22 ]", ageGroup: "31~45" },
+	{ label: "46세~50세", range: "[ 1975-01-21 ~ 1980-01-22 ]", ageGroup: "46~50" },
+	{ label: "51세~55세", range: "[ 1970-01-21 ~ 1975-01-22 ]", ageGroup: "51~55" },
+	{ label: "56세~60세", range: "[ 1965-01-21 ~ 1970-01-22 ]", ageGroup: "56~60" },
+	{ label: "61세 이상", range: "[ ~ 1965-01-22 ]", ageGroup: "61~" },
 ];
 
-const premiumData: Record<string, Record<string, string[]>> = {
-	"30만/30만": {
-		대인1억: [
-			"15,000",
-			"13,500",
-			"12,000",
-			"11,000",
-			"10,500",
-			"10,000",
-		],
-		대인2억: [
-			"18,000",
-			"16,200",
-			"14,400",
-			"13,200",
-			"12,600",
-			"12,000",
-		],
-	},
-	"50만/50만": {
-		대인1억: [
-			"18,500",
-			"16,650",
-			"14,800",
-			"13,550",
-			"12,950",
-			"12,300",
-		],
-		대인2억: [
-			"22,200",
-			"19,980",
-			"17,760",
-			"16,260",
-			"15,540",
-			"14,760",
-		],
-	},
-	"1억/1억": {
-		대인1억: [
-			"22,000",
-			"19,800",
-			"17,600",
-			"16,100",
-			"15,400",
-			"14,600",
-		],
-		대인2억: [
-			"26,400",
-			"23,760",
-			"21,120",
-			"19,320",
-			"18,480",
-			"17,520",
-		],
-	},
-};
-
 export default function PremiumCalculator() {
-	const [daein, setDaein] = useState("책임초과무한");
+	const [premiumData, setPremiumData] = useState<PremiumData[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [daein, setDaein] = useState("책임초과무한"); // 책임초과무한 = 대인2, 책임포함무한 = 대인2+대인1특약
 	const [daemul, setDaemul] = useState("3천");
 	const [jason, setJason] = useState("3천");
-	const [charyang, setCharyang] = useState("3천");
-	const [jabidamgeum, setJabidamgeum] = useState("30만");
+	const [jacha, setJacha] = useState("1천");
+	const [rentCost, setRentCost] = useState(false); // 렌트비용
+	const [legalCost, setLegalCost] = useState(true); // 법률비용 (기본값: 포함)
 	const [calculated, setCalculated] = useState(false);
 
+	// 보험료 데이터 불러오기
+	useEffect(() => {
+		async function loadData() {
+			try {
+				const data = await fetchPremiumRates();
+				setPremiumData(data);
+			} catch (error) {
+				console.error("보험료 데이터 로딩 실패:", error);
+			} finally {
+				setLoading(false);
+			}
+		}
+		loadData();
+	}, []);
+
 	const handleCalculate = () => {
+		if (premiumData.length === 0) return;
 		setCalculated(true);
 	};
 
-	const getCurrentPremiums = () => {
-		const charyangKey = charyang as keyof typeof premiumData;
-		const daeinKey = daein as keyof (typeof premiumData)[typeof charyangKey];
-		return premiumData[charyangKey]?.[daeinKey] || premiumData["30만/30만"]["대인1억"];
+	// 보험료 계산 함수
+	const calculatePremium = (insuranceType: InsuranceType, ageGroup: AgeGroup): number => {
+		if (premiumData.length === 0) return 0;
+		const 대인 = daein === "책임초과무한" ? "대인2" : "대인1특약";
+		const 대물 = `대물${daemul}` as "대물3천" | "대물5천" | "대물1억" | "대물2억";
+		const 자손 = `자손${jason}` as "자손3천" | "자손5천" | "자손1억";
+		const 자차 = `자차${jacha}` as "자차1천" | "자차2천" | "자차3천";
+
+		// 책임포함무한인 경우 대인2 + 대인1특약을 모두 더해야 함
+		if (daein === "책임포함무한") {
+			const 대인2보험료 = calculateTotalPremium(premiumData, insuranceType, ageGroup, {
+				대인: "대인2",
+				대물,
+				자손,
+				자차,
+				렌트비용: rentCost,
+				법률비용: legalCost,
+			});
+			const 대인1특약보험료 = calculateTotalPremium(premiumData, insuranceType, ageGroup, {
+				대인: "대인1특약",
+				대물: undefined,
+				자손: undefined,
+				자차: undefined,
+				렌트비용: false,
+				법률비용: false,
+			});
+			return 대인2보험료 + 대인1특약보험료;
+		} else {
+			// 책임초과무한 = 대인2만
+			return calculateTotalPremium(premiumData, insuranceType, ageGroup, {
+				대인: "대인2",
+				대물,
+				자손,
+				자차,
+				렌트비용: rentCost,
+				법률비용: legalCost,
+			});
+		}
 	};
+
+	if (loading) {
+		return (
+			<section id="premium-calculator" className="py-16 bg-background">
+				<div className="container mx-auto px-4 max-w-5xl">
+					<div className="border border-border rounded-lg overflow-hidden bg-card p-8 text-center">
+						<p className="text-muted-foreground">보험료 데이터를 불러오는 중...</p>
+					</div>
+				</div>
+			</section>
+		);
+	}
 
 	return (
 		<section id="premium-calculator" className="py-16 bg-background">
@@ -103,13 +124,13 @@ export default function PremiumCalculator() {
 					<div className="bg-secondary px-4 py-3 border-b border-border">
 						<h2 className="text-lg font-semibold text-foreground text-center">
 							보험료 적용 기준일{" "}
-							<span className="text-primary font-bold">2026-01-22</span>
+							<span className="text-primary font-bold">2026-01-26</span>
 						</h2>
 					</div>
 
 					{/* Filters */}
 					<div className="p-4 border-b border-border bg-muted/30">
-						<div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-2 sm:gap-3">
+						<div className="grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-nowrap items-center gap-2 sm:gap-3">
 							<Select value={daein} onValueChange={setDaein}>
 								<SelectTrigger className="w-full lg:w-[200px] bg-card text-xs sm:text-sm">
 									<span className="text-muted-foreground mr-1">대인</span>
@@ -130,6 +151,7 @@ export default function PremiumCalculator() {
 									<SelectItem value="3천">3천</SelectItem>
 									<SelectItem value="5천">5천</SelectItem>
 									<SelectItem value="1억">1억</SelectItem>
+									<SelectItem value="2억">2억</SelectItem>
 								</SelectContent>
 							</Select>
 
@@ -145,31 +167,60 @@ export default function PremiumCalculator() {
 								</SelectContent>
 							</Select>
 
-							<Select value={charyang} onValueChange={setCharyang}>
+							<Select value={jacha} onValueChange={setJacha}>
 								<SelectTrigger className="w-full lg:w-[130px] bg-card text-xs sm:text-sm">
-									<span className="text-muted-foreground mr-1">차량</span>
-									<span className="font-medium">{charyang}</span>
+									<span className="text-muted-foreground mr-1">자차</span>
+									<span className="font-medium">{jacha}</span>
 								</SelectTrigger>
 								<SelectContent>
+									<SelectItem value="1천">1천</SelectItem>
+									<SelectItem value="2천">2천</SelectItem>
 									<SelectItem value="3천">3천</SelectItem>
-									<SelectItem value="5천">5천</SelectItem>
 								</SelectContent>
 							</Select>
 
-							<Select value={jabidamgeum} onValueChange={setJabidamgeum}>
-								<SelectTrigger className="w-full lg:w-[150px] bg-card text-xs sm:text-sm">
-									<span className="text-muted-foreground mr-1">자부담</span>
-									<span className="font-medium">{jabidamgeum}</span>
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="30만">30만원</SelectItem>
-									<SelectItem value="50만">50만원</SelectItem>
-								</SelectContent>
-							</Select>
+							{/* 렌트비용 체크박스 */}
+							<div className="flex items-center gap-1.5 px-2 py-2 bg-card rounded-md border border-border shrink-0">
+								<Checkbox
+									id="rent-cost"
+									checked={rentCost}
+									onCheckedChange={(checked) => setRentCost(checked === true)}
+								/>
+								<label
+									htmlFor="rent-cost"
+									className="text-xs font-medium text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap"
+								>
+									렌트
+									<span className="text-muted-foreground text-[10px]">(대리)</span>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Info className="w-3 h-3 text-muted-foreground cursor-help shrink-0" />
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>렌트비용은 대리운전 보험에만 적용됩니다</p>
+										</TooltipContent>
+									</Tooltip>
+								</label>
+							</div>
+
+							{/* 법률비용 체크박스 */}
+							<div className="flex items-center gap-1.5 px-2 py-2 bg-card rounded-md border border-border shrink-0">
+								<Checkbox
+									id="legal-cost"
+									checked={legalCost}
+									onCheckedChange={(checked) => setLegalCost(checked === true)}
+								/>
+								<label
+									htmlFor="legal-cost"
+									className="text-xs font-medium text-foreground cursor-pointer whitespace-nowrap"
+								>
+									법률
+								</label>
+							</div>
 
 							<Button
 								onClick={handleCalculate}
-								className="col-span-2 sm:col-span-1 w-full lg:w-auto bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
+								className="col-span-2 sm:col-span-4 lg:col-span-1 w-full lg:w-auto bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shrink-0"
 							>
 								<Play className="w-4 h-4" />
 								산출
@@ -179,11 +230,10 @@ export default function PremiumCalculator() {
 
 					{/* 모바일: 카드 형식 */}
 					<div className="lg:hidden p-4 space-y-4">
-						{ageGroups.map((age, index) => {
-							const premiums = getCurrentPremiums();
-							const basePremium = calculated
-								? Number.parseInt(premiums[index].replace(",", ""))
-								: 0;
+						{ageGroups.map((age) => {
+							const 대리보험료 = calculated ? calculatePremium("대리", age.ageGroup) : 0;
+							const 탁송보험료 = calculated ? calculatePremium("탁송", age.ageGroup) : 0;
+							const 확대탁송보험료 = calculated ? calculatePremium("확대탁송", age.ageGroup) : 0;
 
 							return (
 								<div
@@ -203,39 +253,31 @@ export default function PremiumCalculator() {
 										<div className="flex justify-between items-center">
 											<span className="text-sm font-medium text-foreground">대리</span>
 											<span className="text-sm font-semibold text-accent">
-												{calculated ? `${premiums[index]}원` : "-"}
+												{calculated ? 대리보험료.toLocaleString() : "-"}
 											</span>
 										</div>
 										<div className="flex justify-between items-center">
 											<span className="text-sm font-medium text-foreground">일반탁송</span>
 											<span className="text-sm font-semibold text-accent">
-												{calculated
-													? `${Math.round(basePremium * 1.1).toLocaleString()}원`
-													: "-"}
+												{calculated ? 탁송보험료.toLocaleString() : "-"}
 											</span>
 										</div>
 										<div className="flex justify-between items-center">
 											<span className="text-sm font-medium text-foreground">확대탁송</span>
 											<span className="text-sm font-semibold text-accent">
-												{calculated
-													? `${Math.round(basePremium * 1.25).toLocaleString()}원`
-													: "-"}
+												{calculated ? 확대탁송보험료.toLocaleString() : "-"}
 											</span>
 										</div>
 										<div className="flex justify-between items-center">
 											<span className="text-sm font-medium text-foreground">대리+탁송</span>
 											<span className="text-sm font-semibold text-accent">
-												{calculated
-													? `${Math.round(basePremium * 1.8).toLocaleString()}원`
-													: "-"}
+												{calculated ? (대리보험료 + 탁송보험료).toLocaleString() : "-"}
 											</span>
 										</div>
 										<div className="flex justify-between items-center">
 											<span className="text-sm font-medium text-foreground">대리+확대</span>
 											<span className="text-sm font-semibold text-accent">
-												{calculated
-													? `${Math.round(basePremium * 2.0).toLocaleString()}원`
-													: "-"}
+												{calculated ? (대리보험료 + 확대탁송보험료).toLocaleString() : "-"}
 											</span>
 										</div>
 									</div>
@@ -270,11 +312,10 @@ export default function PremiumCalculator() {
 								</tr>
 							</thead>
 							<tbody>
-								{ageGroups.map((age, index) => {
-									const premiums = getCurrentPremiums();
-									const basePremium = calculated
-										? Number.parseInt(premiums[index].replace(",", ""))
-										: 0;
+								{ageGroups.map((age) => {
+									const 대리보험료 = calculated ? calculatePremium("대리", age.ageGroup) : 0;
+									const 탁송보험료 = calculated ? calculatePremium("탁송", age.ageGroup) : 0;
+									const 확대탁송보험료 = calculated ? calculatePremium("확대탁송", age.ageGroup) : 0;
 
 									return (
 										<tr
@@ -291,28 +332,20 @@ export default function PremiumCalculator() {
 													</span>
 												</div>
 											</td>
-											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
-												{calculated ? `${premiums[index]}원` : "-"}
+											<td className="px-2 py-4 text-right border-r border-border font-medium text-foreground">
+												{calculated ? 대리보험료.toLocaleString() : "-"}
 											</td>
-											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
-												{calculated
-													? `${Math.round(basePremium * 1.1).toLocaleString()}원`
-													: "-"}
+											<td className="px-2 py-4 text-right border-r border-border font-medium text-foreground">
+												{calculated ? 탁송보험료.toLocaleString() : "-"}
 											</td>
-											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
-												{calculated
-													? `${Math.round(basePremium * 1.25).toLocaleString()}원`
-													: "-"}
+											<td className="px-2 py-4 text-right border-r border-border font-medium text-foreground">
+												{calculated ? 확대탁송보험료.toLocaleString() : "-"}
 											</td>
-											<td className="px-2 py-4 text-center border-r border-border font-medium text-foreground">
-												{calculated
-													? `${Math.round(basePremium * 1.8).toLocaleString()}원`
-													: "-"}
+											<td className="px-2 py-4 text-right border-r border-border font-medium text-foreground">
+												{calculated ? (대리보험료 + 탁송보험료).toLocaleString() : "-"}
 											</td>
-											<td className="px-2 py-4 text-center font-medium text-foreground">
-												{calculated
-													? `${Math.round(basePremium * 2.0).toLocaleString()}원`
-													: "-"}
+											<td className="px-2 py-4 text-right font-medium text-foreground">
+												{calculated ? (대리보험료 + 확대탁송보험료).toLocaleString() : "-"}
 											</td>
 										</tr>
 									);
@@ -333,7 +366,19 @@ export default function PremiumCalculator() {
 							<li className="flex items-start gap-2">
 								<span className="text-primary mt-1">•</span>
 								<span>
-									1회차 25%, 2회차~7회차 10%, 8회차~10회차 5% 입니다
+									보험료 계산식: 대인보험료 + 대물보험료 + 자손보험료 + 자차보험료 + 렌트비용(선택, 대리만) + 법률비용(선택)
+								</span>
+							</li>
+							<li className="flex items-start gap-2">
+								<span className="text-primary mt-1">•</span>
+								<span>
+									렌트비용은 대리운전 보험에만 적용되며, 탁송/확대탁송에는 적용되지 않습니다
+								</span>
+							</li>
+							<li className="flex items-start gap-2">
+								<span className="text-primary mt-1">•</span>
+								<span>
+									책임초과무한 = 대인2, 책임포함무한 = 대인2 + 대인1특약
 								</span>
 							</li>
 							<li className="flex items-start gap-2">
