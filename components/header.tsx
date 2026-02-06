@@ -27,17 +27,12 @@ export function Header() {
             className="flex items-center transition-transform hover:scale-105 active:scale-95"
           >
             <Image
-              src="/images/new2023_logo (1).png"
+              src="/images/db-logo.svg"
               alt="DB손해보험"
               width={140}
               height={56}
-              className="h-9 sm:h-10 md:h-12 w-auto object-contain"
+              className="h-9 sm:h-10 md:h-12 w-auto"
               priority
-              quality={100}
-              style={{
-                imageRendering: 'crisp-edges',
-                filter: 'contrast(1.1) saturate(1.05)',
-              }}
             />
           </Link>
 

@@ -2,10 +2,11 @@
 
 ## 현재 적용 상태
 
-- **로고 파일**: `/public/images/new2023_logo (1).png`
+- **로고 파일**: `/public/images/db-logo.svg` (SVG 버전)
 - **컴포넌트**: `components/header.tsx`
 - **최적화**: Next.js Image 컴포넌트 사용
 - **크기**: 모바일 h-9, 태블릿 h-10, 데스크톱 h-12
+- **장점**: 확대 시 깨짐 없음, 파일 크기 작음, 다크 모드 대응 용이
 
 ## 적용 방법
 

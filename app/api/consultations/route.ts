@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "CONSENT_REQUIRED" }, { status: 400 });
     }
 
-    const { partner, ip, userAgent } = await getPartnerContext();
+    const { partner, ip, userAgent } = await getPartnerContext(req);
     const consultationId = randomUUID();
 
     // 상담신청 저장

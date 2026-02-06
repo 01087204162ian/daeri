@@ -63,6 +63,7 @@ export function ConsultationCTA() {
     setError(null)
     setIsSubmitting(true)
     try {
+      // 쿠키에서 partner 코드 가져오기 (URL 파라미터는 서버에서 쿠키로 변환됨)
       const res = await fetch("/api/consultations", {
         method: "POST",
         headers: { "content-type": "application/json" },

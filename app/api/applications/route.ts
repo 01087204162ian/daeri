@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "CONSENT_REQUIRED" }, { status: 400 });
     }
 
-    const { partner, ip, userAgent } = await getPartnerContext();
+    const { partner, ip, userAgent } = await getPartnerContext(req);
 
     if (!parsed.data.isSamePerson) {
       if (!parsed.data.contractorName) {

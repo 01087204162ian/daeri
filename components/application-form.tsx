@@ -2,6 +2,7 @@
 
 import React from "react"
 import { useState, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -78,6 +79,7 @@ export function ApplicationForm() {
     setError(null)
     setIsSubmitting(true)
     try {
+      // 쿠키에서 partner 코드 가져오기 (URL 파라미터는 서버에서 쿠키로 변환됨)
       const res = await fetch("/api/applications", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -149,6 +151,7 @@ export function ApplicationForm() {
     // 보험료 자동 계산
     setIsCalculatingPremium(true)
     try {
+      // 쿠키에서 partner 코드 가져오기 (URL 파라미터는 서버에서 쿠키로 변환됨)
       const res = await fetch("/api/calculate-premium", {
         method: "POST",
         headers: { "content-type": "application/json" },
