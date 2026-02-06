@@ -24,18 +24,98 @@ import {
 	type PremiumData,
 } from "@/lib/premium-data-client";
 
+/**
+ * 나이대별 생년월일 범위 계산 함수
+ * 기준일: 현재 날짜
+ * 
+ * 예시: 기준일 2026-02-06, 26세~30세
+ * - 만 26세: 2000-02-06 이전 출생 → 2000-02-05까지
+ * - 만 30세: 1996-02-06 이후 출생 → 1996-02-06부터
+ * - 범위: 1996-02-06 ~ 2000-02-05
+ */
+function calculateAgeRange(ageGroup: AgeGroup): string {
+	const today = new Date();
+	const currentYear = today.getFullYear();
+	const currentMonth = today.getMonth();
+	const currentDay = today.getDate();
+
+	let minAge: number;
+	let maxAge: number;
+
+	switch (ageGroup) {
+		case "26~30":
+			minAge = 26;
+			maxAge = 30;
+			break;
+		case "31~45":
+			minAge = 31;
+			maxAge = 45;
+			break;
+		case "46~50":
+			minAge = 46;
+			maxAge = 50;
+			break;
+		case "51~55":
+			minAge = 51;
+			maxAge = 55;
+			break;
+		case "56~60":
+			minAge = 56;
+			maxAge = 60;
+			break;
+		case "61~":
+			// 61세 이상: 기준일 기준 만 61세 이상
+			// 만 61세가 되는 가장 늦은 생년월일 계산
+			const birthYear61 = currentYear - 61;
+			const birthDate61 = new Date(birthYear61, currentMonth, currentDay);
+			// 생일이 지나지 않았으면 1년 빼기
+			if (birthDate61 > today) {
+				birthDate61.setFullYear(birthYear61 - 1);
+			}
+			return `[ ~ ${birthDate61.toISOString().split('T')[0]} ]`;
+		default:
+			return "";
+	}
+
+	// 최대 나이(maxAge)의 생년월일 (가장 어린 경우, 즉 가장 늦게 태어난 경우)
+	// 예: 만 30세 → 1996-02-06 이후 출생 → 1996-02-06부터
+	const maxBirthYear = currentYear - maxAge;
+	const maxBirthDate = new Date(maxBirthYear, currentMonth, currentDay);
+	// 생일이 지나지 않았으면 1년 빼기 (만 나이 계산)
+	if (maxBirthDate > today) {
+		maxBirthDate.setFullYear(maxBirthYear - 1);
+	}
+
+	// 최소 나이(minAge)의 생년월일 (가장 나이 많은 경우, 즉 가장 일찍 태어난 경우)
+	// 예: 만 26세 → 2000-02-06 이전 출생 → 2000-02-05까지
+	const minBirthYear = currentYear - minAge;
+	const minBirthDate = new Date(minBirthYear, currentMonth, currentDay);
+	// 생일이 지나지 않았으면 1년 빼기 (만 나이 계산)
+	if (minBirthDate > today) {
+		minBirthDate.setFullYear(minBirthYear - 1);
+	}
+	// 하루 전으로 설정 (이전 출생이므로)
+	minBirthDate.setDate(minBirthDate.getDate() - 1);
+
+	// 범위: 가장 어린 경우(늦게 태어남) ~ 가장 나이 많은 경우(일찍 태어남)
+	const minDateStr = maxBirthDate.toISOString().split('T')[0]; // 가장 어린 경우 (늦게 태어남)
+	const maxDateStr = minBirthDate.toISOString().split('T')[0]; // 가장 나이 많은 경우 (일찍 태어남)
+
+	return `[ ${minDateStr} ~ ${maxDateStr} ]`;
+}
+
 const ageGroups: Array<{ label: string; range: string; ageGroup: AgeGroup }> = [
-	{ label: "26세~30세", range: "[ 1995-01-21 ~ 2000-01-22 ]", ageGroup: "26~30" },
-	{ label: "31세~45세", range: "[ 1980-01-21 ~ 1995-01-22 ]", ageGroup: "31~45" },
-	{ label: "46세~50세", range: "[ 1975-01-21 ~ 1980-01-22 ]", ageGroup: "46~50" },
-	{ label: "51세~55세", range: "[ 1970-01-21 ~ 1975-01-22 ]", ageGroup: "51~55" },
-	{ label: "56세~60세", range: "[ 1965-01-21 ~ 1970-01-22 ]", ageGroup: "56~60" },
-	{ label: "61세 이상", range: "[ ~ 1965-01-22 ]", ageGroup: "61~" },
+	{ label: "26세~30세", range: calculateAgeRange("26~30"), ageGroup: "26~30" },
+	{ label: "31세~45세", range: calculateAgeRange("31~45"), ageGroup: "31~45" },
+	{ label: "46세~50세", range: calculateAgeRange("46~50"), ageGroup: "46~50" },
+	{ label: "51세~55세", range: calculateAgeRange("51~55"), ageGroup: "51~55" },
+	{ label: "56세~60세", range: calculateAgeRange("56~60"), ageGroup: "56~60" },
+	{ label: "61세 이상", range: calculateAgeRange("61~"), ageGroup: "61~" },
 ];
 
 export default function PremiumCalculator() {
 	const [premiumData, setPremiumData] = useState<PremiumData[]>([]);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [daein, setDaein] = useState("책임초과무한"); // 책임초과무한 = 대인2, 책임포함무한 = 대인2+대인1특약
 	const [daemul, setDaemul] = useState("3천");
 	const [jason, setJason] = useState("3천");
@@ -44,24 +124,23 @@ export default function PremiumCalculator() {
 	const [legalCost, setLegalCost] = useState(true); // 법률비용 (기본값: 포함)
 	const [calculated, setCalculated] = useState(false);
 
-	// 보험료 데이터 불러오기
-	useEffect(() => {
-		async function loadData() {
+	const handleCalculate = async () => {
+		// 데이터가 없으면 먼저 로드
+		if (premiumData.length === 0) {
+			setLoading(true);
 			try {
 				const data = await fetchPremiumRates();
 				setPremiumData(data);
+				setCalculated(true);
 			} catch (error) {
 				console.error("보험료 데이터 로딩 실패:", error);
 			} finally {
 				setLoading(false);
 			}
+		} else {
+			// 데이터가 이미 있으면 바로 계산
+			setCalculated(true);
 		}
-		loadData();
-	}, []);
-
-	const handleCalculate = () => {
-		if (premiumData.length === 0) return;
-		setCalculated(true);
 	};
 
 	// 보험료 계산 함수
@@ -124,7 +203,9 @@ export default function PremiumCalculator() {
 					<div className="bg-secondary px-4 py-3 border-b border-border">
 						<h2 className="text-lg font-semibold text-foreground text-center">
 							보험료 적용 기준일{" "}
-							<span className="text-primary font-bold">2026-01-26</span>
+							<span className="text-primary font-bold">
+								{new Date().toISOString().split('T')[0]}
+							</span>
 						</h2>
 					</div>
 
@@ -220,10 +301,11 @@ export default function PremiumCalculator() {
 
 							<Button
 								onClick={handleCalculate}
+								disabled={loading}
 								className="col-span-2 sm:col-span-4 lg:col-span-1 w-full lg:w-auto bg-primary hover:bg-primary/90 text-primary-foreground gap-2 shrink-0"
 							>
 								<Play className="w-4 h-4" />
-								산출
+								{loading ? "로딩 중..." : "산출"}
 							</Button>
 						</div>
 					</div>
@@ -241,11 +323,13 @@ export default function PremiumCalculator() {
 									className="bg-muted/30 rounded-lg p-4 space-y-3"
 								>
 									<div className="border-b border-border pb-2">
-										<div className="text-primary font-bold text-base">
-											{age.label}
-										</div>
-										<div className="text-muted-foreground text-xs mt-1">
-											{age.range}
+										<div className="flex items-center gap-2 flex-wrap">
+											<div className="text-primary font-bold text-base">
+												{age.label}
+											</div>
+											<div className="text-muted-foreground text-xs">
+												{age.range}
+											</div>
 										</div>
 									</div>
 

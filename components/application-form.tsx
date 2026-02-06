@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { CheckCircle2, XCircle } from "lucide-react"
 import { validateResidentNumber } from "@/lib/resident-number"
+import { toast } from "sonner"
 
 export function ApplicationForm() {
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ export function ApplicationForm() {
     addressDetail: "",
     isSamePerson: true,
     contractorName: "",
+    contractorPhone: "",
     contractorResidentNumber1: "",
     contractorResidentNumber2: "",
     bankName: "",
@@ -33,7 +35,6 @@ export function ApplicationForm() {
     cardExpiry: "",
     consentPrivacy: false,
   })
-  const [isSubmitted, setIsSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [residentNumberError, setResidentNumberError] = useState<string | null>(null)
@@ -43,6 +44,34 @@ export function ApplicationForm() {
   // 주민번호 입력 필드 ref
   const residentNumber2Ref = useRef<HTMLInputElement>(null)
   const contractorResidentNumber2Ref = useRef<HTMLInputElement>(null)
+
+  // 폼 초기화 함수
+  const resetForm = () => {
+    setFormData({
+      insuranceType: "daeri",
+      name: "",
+      phone: "",
+      residentNumber1: "",
+      residentNumber2: "",
+      yearlyPremium: "",
+      firstPremium: "",
+      address: "",
+      addressDetail: "",
+      isSamePerson: true,
+      contractorName: "",
+      contractorPhone: "",
+      contractorResidentNumber1: "",
+      contractorResidentNumber2: "",
+      bankName: "",
+      accountNumber: "",
+      cardNumber: "",
+      cardExpiry: "",
+      consentPrivacy: false,
+    })
+    setResidentNumberError(null)
+    setContractorResidentNumberError(null)
+    setError(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,9 +87,22 @@ export function ApplicationForm() {
       if (!res.ok || !data?.ok) {
         throw new Error(data?.error || "SUBMIT_FAILED")
       }
-      setIsSubmitted(true)
+      
+      // 성공 시 토스트 메시지 표시 및 폼 초기화
+      toast.success("가입신청이 완료되었습니다", {
+        description: "심사 결과는 담당자가 확인 후 문자로 안내드리겠습니다.",
+        duration: 5000,
+      })
+      
+      // 폼 초기화
+      resetForm()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "SUBMIT_FAILED")
+      const errorMessage = err instanceof Error ? err.message : "SUBMIT_FAILED"
+      setError(errorMessage)
+      toast.error("가입신청에 실패했습니다", {
+        description: errorMessage,
+        duration: 5000,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -305,7 +347,7 @@ export function ApplicationForm() {
               </AccordionItem>
 
               {/* 해지방법 */}
-              <AccordionItem value="cancel" className="border border-destructive/30 border-b border-b-destructive/30 bg-destructive/5 rounded-lg px-4">
+              <AccordionItem value="cancel" className="border border-destructive/30 !border-b !border-b-destructive/30 bg-destructive/5 rounded-lg px-4">
                 <AccordionTrigger className="hover:no-underline py-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-destructive text-destructive-foreground font-bold text-xs">
@@ -548,6 +590,25 @@ export function ApplicationForm() {
                       )}
                     </div>
                   </div>
+
+                  {/* 계약자 전화번호 */}
+                  <div className="flex flex-row items-center gap-2 sm:gap-4">
+                    <Label htmlFor="contractorPhone" className="text-sm font-medium w-32 shrink-0">
+                      전화번호 <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="contractorPhone"
+                      type="tel"
+                      placeholder="010-0000-0000"
+                      value={formData.contractorPhone}
+                      onChange={(e) => {
+                        const formatted = formatPhoneNumber(e.target.value)
+                        handleChange("contractorPhone", formatted)
+                      }}
+                      required
+                      className="h-10 flex-1 bg-background border-border/60 shadow-sm transition-all duration-200 hover:border-border focus-visible:border-primary focus-visible:shadow-md"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -644,25 +705,6 @@ export function ApplicationForm() {
           </div>
         </div>
       </div>
-      {isSubmitted && (
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8 mt-10">
-          <Card className="border-primary/20">
-            <CardContent className="pt-12 pb-12 text-center">
-              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                <CheckCircle2 className="w-10 h-10 text-green-600" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground mb-2">가입신청이 완료되었습니다</h3>
-              <p className="text-muted-foreground mb-6">
-                담당자가 확인 후 연락드리겠습니다.<br />
-                감사합니다.
-              </p>
-              <Button onClick={() => setIsSubmitted(false)} variant="outline" className="bg-transparent">
-                다시 신청하기
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </section>
   )
 }

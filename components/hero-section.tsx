@@ -201,7 +201,7 @@ export function HeroSection() {
               </div>
 
               <Button className="mt-4 sm:mt-6 w-full text-sm sm:text-base" size="lg" asChild>
-                <Link href="#consultation">지금 가입하기</Link>
+                <Link href="#apply">지금 가입하기</Link>
               </Button>
             </div>
           </div>

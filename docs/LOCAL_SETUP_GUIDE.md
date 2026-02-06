@@ -376,17 +376,121 @@ exit;
 
 ### 8-2. 가입신청 테스트
 
-1. 웹사이트에서 "가입신청" 버튼 클릭
-2. 필요한 정보 입력
-3. 제출
-4. MySQL에서 확인:
+1. **가입신청 폼 작성**
+   - 보험 유형 선택
+   - 신청자 정보 입력 (이름, 전화번호, 주민번호 등)
+   - 주민번호 입력 시 보험료 자동 계산 확인
+   - 계약자 정보 입력 (대리기사와 계약자가 다른 경우)
+   - 은행 계좌 정보 입력
+   - 개인정보 동의 체크
 
-```bash
-mysql -u root -p daeri_db
-SELECT * FROM applications ORDER BY created_at DESC LIMIT 1;
-SELECT * FROM application_secrets WHERE application_id = '방금_생성된_ID';
-exit;
+2. **가입신청 제출**
+   - "가입 신청하기" 버튼 클릭
+   - 성공 시 토스트 메시지 확인: "가입신청이 완료되었습니다"
+   - 폼이 자동으로 초기화되는지 확인
+
+3. **데이터베이스 확인**
+   ```sql
+   -- MySQL 접속
+   mysql -u daeri_user -p daeri_db
+   
+   -- 가입신청 데이터 확인
+   SELECT * FROM applications ORDER BY created_at DESC LIMIT 1;
+   
+   -- 암호화된 민감정보 확인
+   SELECT * FROM application_secrets WHERE application_id = '최근_신청_ID';
+   
+   -- SMS 발송 로그 확인
+   SELECT * FROM message_logs WHERE entity_type = 'application' ORDER BY created_at DESC LIMIT 5;
+   ```
+
+4. **SMS 발송 확인**
+   - 사용자 전화번호로 SMS 수신 확인
+   - 메시지 내용: "가입신청이 완료되었습니다. 심사 결과는 담당자가 확인 후 문자로 안내드리겠습니다."
+   - `OPERATOR_PHONE`이 설정되어 있으면 담당자에게도 SMS 발송 확인
+
+### 8-3. 문자 메시지 테스트 방법
+
+#### SMS 발송 테스트 전 확인사항
+
+1. **환경변수 설정 확인**
+   ```bash
+   # .env.local 파일 확인
+   cat .env.local | grep ALIGO
+   ```
+
+2. **필수 환경변수**
+   - **방식 1 (권장)**: `ALIGO_LAMBDA_URL` 설정
+   - **방식 2**: `ALIGO_USER_ID`, `ALIGO_API_KEY`, `ALIGO_SENDER`, `ALIGO_SMS_URL` 설정
+
+#### 테스트 방법
+
+**방법 1: 가입신청을 통한 테스트 (실제 사용 시나리오)**
+1. 가입신청 폼 작성 및 제출
+2. 실제 전화번호로 SMS 수신 확인
+3. 콘솔 로그에서 SMS 발송 성공/실패 확인
+4. `message_logs` 테이블에서 발송 로그 확인
+
+**방법 2: 데이터베이스 로그 확인**
+```sql
+-- SMS 발송 로그 조회
+SELECT 
+  id,
+  entity_type,
+  entity_id,
+  channel,
+  to_phone,
+  status,
+  vendor_response,
+  created_at
+FROM message_logs
+WHERE channel = 'sms'
+ORDER BY created_at DESC
+LIMIT 10;
+
+-- 발송 실패 로그 확인
+SELECT * FROM message_logs WHERE status = 'error' ORDER BY created_at DESC;
 ```
+
+**방법 3: 콘솔 로그 확인**
+- 개발 서버 터미널에서 SMS 발송 관련 로그 확인
+- 성공 시: 로그 없음 (정상)
+- 실패 시: `[SMS 발송 실패]` 또는 `[SMS 발송 예외]` 메시지 확인
+
+#### SMS 발송 실패 시 확인사항
+
+1. **환경변수 확인**
+   - `ALIGO_LAMBDA_URL` 또는 알리고 관련 환경변수가 올바르게 설정되었는지 확인
+   - `.env.local` 파일이 프로젝트 루트에 있는지 확인
+   - 개발 서버 재시작 (환경변수 변경 후)
+
+2. **전화번호 형식 확인**
+   - 전화번호가 10자리 이상인지 확인
+   - 하이픈은 자동으로 제거되므로 문제없음
+
+3. **Lambda 프록시 확인** (방식 1 사용 시)
+   - Lambda URL이 올바른지 확인
+   - Lambda 함수가 정상 작동하는지 확인
+
+4. **알리고 API 확인** (방식 2 사용 시)
+   - 알리고 계정이 정상인지 확인
+   - API 키가 유효한지 확인
+   - 발신번호가 등록되어 있는지 확인
+
+#### 테스트 모드 사용 (Lambda 프록시 사용 시)
+
+Lambda 프록시가 `testmode_yn` 파라미터를 지원하는 경우, 테스트 모드로 발송할 수 있습니다:
+
+```typescript
+// lib/aligo.ts에서 testmode 옵션 사용
+await aligoSendSms({ 
+  to: "01012345678", 
+  text: "테스트 메시지",
+  testmode: true  // 테스트 모드
+});
+```
+
+> **참고**: 현재 가입신청 API에서는 테스트 모드를 사용하지 않습니다. 실제 SMS가 발송됩니다.
 
 ---
 

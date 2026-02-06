@@ -328,3 +328,174 @@ ALIGO_SMS_URL=...
 - [ ] 상담신청 기능 테스트
 
 ---
+
+## 2026-02-02 (가입신청 완료 후 UX 개선 및 SMS 발송 개선)
+
+### 작업 내용: 가입신청 완료 후 사용자 경험 개선 및 SMS 발송 로직 개선
+
+#### 완료된 작업
+
+1. **가입신청 완료 후 폼 초기화**
+   - `resetForm()` 함수 생성
+   - 신청 성공 시 모든 입력 필드 자동 초기화
+   - 에러 메시지도 함께 초기화
+
+2. **토스트 메시지로 완료 알림**
+   - `sonner` 라이브러리 사용하여 토스트 메시지 구현
+   - `app/layout.tsx`에 `Toaster` 컴포넌트 추가
+   - 성공 시: "가입신청이 완료되었습니다" 토스트 표시
+   - 실패 시: "가입신청에 실패했습니다" 에러 토스트 표시
+   - 기존 완료 화면(Card) 제거, 토스트로 대체
+
+3. **SMS 발송 로직 개선**
+   - 사용자에게 SMS 발송 기능 추가
+   - 메시지 내용: "가입신청이 완료되었습니다. 심사 결과는 담당자가 확인 후 문자로 안내드리겠습니다."
+   - 에러 처리 강화:
+     - SMS 발송 실패 시 콘솔 로그 출력
+     - 예외 발생 시에도 로그 저장
+     - 전화번호 검증 강화 (10자리 이상 확인)
+   - 발송 로그를 `message_logs` 테이블에 저장
+
+4. **문서 업데이트**
+   - `docs/LOCAL_SETUP_GUIDE.md`에 문자 메시지 테스트 방법 추가
+     - SMS 발송 테스트 전 확인사항
+     - 테스트 방법 3가지 (가입신청 통한 테스트, DB 로그 확인, 콘솔 로그 확인)
+     - SMS 발송 실패 시 확인사항
+     - 테스트 모드 사용 방법
+
+5. **README.md에서 Supabase 제거**
+   - Supabase 관련 내용 모두 제거
+   - MySQL 관련 내용으로 교체
+   - "A. Supabase 준비" → "A. MySQL 준비"로 변경
+   - 환경변수 섹션에서 Supabase 환경변수 제거
+
+#### 수정된 파일
+
+- `components/application-form.tsx` (수정)
+  - `sonner`의 `toast` import 추가
+  - `resetForm()` 함수 추가
+  - `handleSubmit()` 함수 수정:
+    - 성공 시 토스트 메시지 표시 및 폼 초기화
+    - 실패 시 에러 토스트 표시
+  - 기존 완료 화면 제거
+- `app/layout.tsx` (수정)
+  - `Toaster` 컴포넌트 추가
+- `app/api/applications/route.ts` (수정)
+  - 사용자에게 SMS 발송 로직 추가
+  - 에러 처리 강화 (try-catch, 콘솔 로그)
+  - 전화번호 검증 강화
+- `docs/README.md` (수정)
+  - Supabase 관련 내용 제거
+  - MySQL 관련 내용으로 교체
+- `docs/LOCAL_SETUP_GUIDE.md` (수정)
+  - 문자 메시지 테스트 방법 섹션 추가 (8-3)
+
+#### 동작 방식
+
+1. **가입신청 제출**
+   - 사용자가 가입신청 폼 작성 및 제출
+
+2. **성공 시**
+   - 토스트 메시지 표시: "가입신청이 완료되었습니다"
+   - 설명: "심사 결과는 담당자가 확인 후 문자로 안내드리겠습니다"
+   - 폼 자동 초기화
+   - 사용자 전화번호로 SMS 발송
+   - 담당자 전화번호로 SMS 발송 (OPERATOR_PHONE 설정 시)
+
+3. **실패 시**
+   - 에러 토스트 메시지 표시
+   - 폼은 그대로 유지 (재시도 가능)
+
+#### 참고사항
+
+- SMS 발송은 비동기로 처리되며, 실패해도 가입신청은 성공으로 처리됨
+- SMS 발송 로그는 `message_logs` 테이블에 저장되어 추적 가능
+- 환경변수 `ALIGO_LAMBDA_URL` 또는 알리고 관련 환경변수 설정 필요
+- 문자 메시지 테스트 방법은 `docs/LOCAL_SETUP_GUIDE.md`의 8-3 섹션 참고
+
+#### 알려진 이슈
+
+- **SMS 인증 오류 (result_code: -101)**: Lambda 프록시의 알리고 API 키 인증 오류
+  - 증상: `message_logs` 테이블에 `result_code: -101, message: "인증오류입니다."` 응답
+  - 상태: 개발팀에 문의하여 Lambda 프록시의 알리고 API 키 확인 및 갱신 필요
+  - 임시 조치: 응답 본문의 `result_code`를 확인하여 실패 처리하도록 코드 수정 완료
+  - 해결 예정: 개발팀에서 Lambda 프록시 설정 확인 후 수정 예정
+
+---
+
+## 2026-02-06
+
+### 작업 내용: UI/UX 개선 및 기능 추가
+
+#### 완료된 작업
+
+1. **DB손보 로고 고도화**
+   - Next.js Image 컴포넌트 적용 (자동 최적화, 지연 로딩)
+   - 로고 크기 조정: 모바일 h-9, 태블릿 h-10, 데스크톱 h-12
+   - 선명도 개선: `quality={100}`, `imageRendering: 'crisp-edges'`, 대비/채도 필터 적용
+   - 공식 로고 파일 사용: `new2023_logo (1).png`
+   - 호버 효과 추가: `hover:scale-105`, `active:scale-95`
+   - 문서 작성: `docs/LOGO_IMPROVEMENT_GUIDE.md`, `docs/LOGO_APPLICATION_GUIDE.md`, `docs/LOGO_TRANSPARENT_GUIDE.md`
+
+2. **가입신청 버튼 링크 수정**
+   - "지금 가입하기" 버튼 링크 변경: `#consultation` → `#apply`
+   - 가입신청 폼으로 직접 이동하도록 개선
+
+3. **가입절차 안내 UI 수정**
+   - 해지방법 섹션 테두리 수정: 아래 테두리 추가 (`!border-b !border-b-destructive/30`)
+   - Accordion 컴포넌트의 `last:border-b-0` 기본 스타일 오버라이드
+
+4. **상담신청 섹션 UI 개선**
+   - 좌측 "연락처 안내" 제목 삭제 (연락처 정보는 유지)
+   - 우측 "상담 신청" 제목 삭제
+   - 우측 "정보를 남겨주시면 상담사가 연락드립니다." 설명 텍스트 삭제
+   - 레이아웃: 2열 그리드 유지 (좌측: 연락처 정보, 우측: 상담 신청 폼)
+
+5. **계약자 전화번호 필드 추가**
+   - 계약자와 대리기사가 다를 경우 계약자 전화번호 입력 필드 추가
+   - 프론트엔드: `application-form.tsx`에 `contractorPhone` 필드 추가
+   - 전화번호 자동 하이픈 포맷팅 적용
+   - 유효성 검사: `validators.ts`에 `contractorPhone` 필드 추가
+   - 백엔드: `applications/route.ts`에 계약자 전화번호 필수 검증 및 저장 로직 추가
+   - DB 스키마: `applications` 테이블에 `contractor_phone VARCHAR(20)` 컬럼 추가
+   - DB 마이그레이션 SQL 제공:
+     ```sql
+     ALTER TABLE applications ADD COLUMN contractor_phone VARCHAR(20) AFTER contractor_name;
+     ```
+
+#### 변경된 파일
+
+- `components/header.tsx` - 로고 최적화 및 선명도 개선
+- `components/hero-section.tsx` - "지금 가입하기" 버튼 링크 수정
+- `components/application-form.tsx` - 해지방법 테두리 수정, 계약자 전화번호 필드 추가
+- `components/consultation-cta.tsx` - 상담신청 섹션 UI 개선
+- `lib/validators.ts` - 계약자 전화번호 필드 추가
+- `app/api/applications/route.ts` - 계약자 전화번호 저장 로직 추가
+- `docs/mysql-schema.sql` - `contractor_phone` 컬럼 추가
+- `docs/LOGO_IMPROVEMENT_GUIDE.md` - 로고 고도화 가이드 작성
+- `docs/LOGO_APPLICATION_GUIDE.md` - 로고 적용 가이드 작성
+- `docs/LOGO_TRANSPARENT_GUIDE.md` - 투명 배경 로고 가이드 작성
+
+#### 기술적 개선사항
+
+1. **이미지 최적화**
+   - Next.js Image 컴포넌트의 자동 최적화 기능 활용
+   - WebP 변환, 리사이징, 지연 로딩 자동 처리
+   - 고해상도 디스플레이 대응
+
+2. **사용자 경험 개선**
+   - 가입신청 버튼이 올바른 섹션으로 이동
+   - 상담신청 섹션 UI 간소화
+   - 계약자 정보 입력 필드 완성도 향상
+
+3. **데이터베이스 확장**
+   - 계약자 전화번호 정보 저장 기능 추가
+   - 기존 데이터와의 호환성 유지 (NULL 허용)
+
+#### 다음 단계 (선택사항)
+
+- DB 마이그레이션 실행: `contractor_phone` 컬럼 추가
+- 로고 SVG 버전 전환 검토 (더 선명한 표시)
+- 다크 모드 대응 로고 추가 검토
+
+---

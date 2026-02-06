@@ -29,6 +29,7 @@ export const ApplicationSchema = z.object({
 
   isSamePerson: z.boolean(),
   contractorName: z.string().optional().nullable(),
+  contractorPhone: phoneDigits.optional().nullable(),
   contractorResidentNumber1: z.string().optional().nullable(),
   contractorResidentNumber2: z.string().optional().nullable(),
 

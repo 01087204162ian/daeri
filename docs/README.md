@@ -106,16 +106,13 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 ### 진행 상황 (2026-02-02)
 
 #### ✅ 완료된 작업
-- [x] **A. Supabase 준비** - 완료
-  - [x] Supabase 프로젝트 생성 완료
-  - [x] 프로젝트 URL 확인 완료
-  - [x] Service Role Key 확인 완료
-  - [x] SQL Editor에서 `docs/supabase-schema.sql` 실행 완료
+- [x] **A. MySQL 준비** - 완료
+  - [x] MySQL 설치 완료
+  - [x] 데이터베이스 생성 완료 (`daeri_db`)
+  - [x] 스키마 실행 완료 (`docs/mysql-schema.sql`)
   - [x] 테이블 생성 확인 완료 (partners, consultations, applications, application_secrets, message_logs, premium_rates)
   - [x] `partners` 테이블에 기본 파트너 'default' 1개 행 확인 완료
-  - [x] `premium_rates` 테이블에 12개 행 확인 완료 (대리 6개 + 탁송 6개)
-  - [x] `get_premium_rate()` 함수 테스트 완료 (정상 동작 확인)
-  - [x] `calculate_premium_total()` 함수 테스트 완료 (정상 동작 확인, 예: 990,900원 계산 결과 확인)
+  - [x] `premium_rates` 테이블에 보험료 데이터 확인 완료 (대리 6개 + 탁송 6개 + 확대탁송 6개)
 
 - [x] **로컬 개발 환경 설정** - 완료
   - [x] Windows 환경에서 `.env.local` 파일 생성 완료
@@ -148,7 +145,6 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
   - [ ] 운영 환경 배포 후 전체 기능 테스트
 
 #### 📝 참고사항
-- Supabase 프로젝트 정보는 Settings > API에서 확인 가능
 - GitHub에 daeri 프로젝트 코드가 이미 올라가 있음
 - Vercel 환경변수 설정 방법은 아래 B-1 ~ B-4 섹션 참고
 - Windows 환경에서는 `.env.local` 파일을 각 개발 머신에 개별적으로 생성해야 함
@@ -156,25 +152,23 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 
 ---
 
-### A. Supabase 준비
-- [x] Supabase 프로젝트 생성
-  - [x] [Supabase Dashboard](https://app.supabase.com)에서 새 프로젝트 생성
-  - [x] 프로젝트 URL 확인: Settings > API > Project URL (`https://[프로젝트ID].supabase.co`)
-  - [x] Service Role Key 확인: Settings > API > Project API keys > `service_role` (secret)
-- [x] SQL Editor에서 `docs/supabase-schema.sql` 실행
+### A. MySQL 준비
+- [x] MySQL 설치 완료
+  - [x] MySQL 서버 설치 및 실행 확인
+  - [x] 데이터베이스 생성: `CREATE DATABASE daeri_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+- [x] 스키마 실행 완료
+  - [x] `docs/mysql-schema.sql` 실행
   - [x] 기본 테이블 생성 (partners, consultations, applications, application_secrets, message_logs)
   - [x] 보험료 데이터 테이블 생성 (`premium_rates`)
-  - [x] 보험료 데이터 초기 삽입 (대리/탁송, 6개 나이대별, 12개 담보별)
-  - [x] 보험료 조회 함수 및 계산 함수 생성
+  - [x] 보험료 데이터 초기 삽입 (대리/탁송/확대탁송, 6개 나이대별, 담보별)
 - [ ] `partners`에 테넌트 추가
   - [x] `default` (스키마 실행 시 자동 생성됨)
   - [ ] `kakao`
   - [ ] `tmap`
   - [ ] 기타 파트너(`cnmp`, `logi` 등)
 - [x] 보험료 데이터 확인
-  - [x] `premium_rates` 테이블에 12개 행 삽입 확인 (대리 6개 + 탁송 6개)
-  - [x] `get_premium_rate()` 함수 동작 확인
-  - [x] `calculate_premium_total()` 함수 동작 확인
+  - [x] `premium_rates` 테이블에 보험료 데이터 확인 (대리 6개 + 탁송 6개 + 확대탁송 6개)
+  - [x] 보험료 조회 API (`/api/premium-rates`) 동작 확인
 
 ### B. Vercel 환경변수 설정
 
@@ -195,16 +189,19 @@ mysql -u root -p daeri_db < docs/mysql-schema.sql
 - "Save" 클릭
 
 필수 환경변수:
-- [ ] `SUPABASE_URL` (예: `https://[프로젝트ID].supabase.co`)
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` (Settings > API > service_role key)
+- [ ] `MYSQL_HOST` (기본값: localhost)
+- [ ] `MYSQL_PORT` (기본값: 3306)
+- [ ] `MYSQL_USER` (MySQL 사용자명)
+- [ ] `MYSQL_PASSWORD` (MySQL 비밀번호)
+- [ ] `MYSQL_DATABASE` (기본값: daeri_db)
 - [ ] `FIELD_ENCRYPTION_KEY` (base64 32 bytes) - 생성 필요
-  - [ ] `ALIGO_LAMBDA_URL` (AWS Lambda 프록시 URL, 권장) 또는
+- [ ] `ALIGO_LAMBDA_URL` (AWS Lambda 프록시 URL, 권장) 또는
   - [ ] `ALIGO_USER_ID` (알리고 계정 정보, 직접 호출 시)
   - [ ] `ALIGO_API_KEY` (알리고 계정 정보, 직접 호출 시)
   - [ ] `ALIGO_SENDER` (발신번호, 직접 호출 시)
   - [ ] `ALIGO_SMS_URL` (알리고 SMS 엔드포인트, 직접 호출 시)
   - [ ] `ALIGO_KAKAO_URL` (카톡 발송 사용 시, 알리고 카카오톡 엔드포인트)
-- [ ] `OPERATOR_PHONE` (담당자 수신번호)
+- [ ] `OPERATOR_PHONE` (담당자 수신번호, 선택)
 
 #### B-4. 환경변수 추가 후 재배포
 - [ ] "Deployments" 탭 클릭
@@ -367,9 +364,13 @@ npm run start
    - Vercel 대시보드 → Project Settings → Environment Variables
    - 다음 환경변수 추가:
      ```
-     SUPABASE_URL
-     SUPABASE_SERVICE_ROLE_KEY
+     MYSQL_HOST
+     MYSQL_PORT
+     MYSQL_USER
+     MYSQL_PASSWORD
+     MYSQL_DATABASE
      FIELD_ENCRYPTION_KEY
+     ALIGO_LAMBDA_URL (권장) 또는
      ALIGO_USER_ID
      ALIGO_API_KEY
      ALIGO_SENDER
@@ -620,7 +621,54 @@ npm run start
 
 ---
 
-## 11) 개발 이력
+## 11) 문서 인덱스
+
+프로젝트의 상세 문서들은 `docs/` 폴더에 있습니다. 각 문서의 목적과 내용을 확인하세요.
+
+### 필수 문서 (시작하기 전에 읽기)
+- **[LOCAL_SETUP_GUIDE.md](./LOCAL_SETUP_GUIDE.md)** - 로컬 개발 환경 설정 가이드
+  - Node.js 설치, MySQL 설정, 환경변수 구성, 개발 서버 실행 방법
+  - 문자 메시지 테스트 방법 포함
+
+- **[DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)** - 배포 가이드
+  - EC2 배포 방법, PM2/Nginx 설정, GitHub Actions CI/CD
+  - Vercel, AWS Amplify 등 다른 배포 옵션도 README.md의 "10) 배포 방법" 섹션 참고
+
+- **[mysql-schema.sql](./mysql-schema.sql)** - MySQL 데이터베이스 스키마
+  - 테이블 구조, 초기 데이터, 인덱스 정의
+
+### 개발 가이드 문서
+- **[BACKEND_EXPLAINED.md](./BACKEND_EXPLAINED.md)** - 백엔드 작동 방식 설명
+  - Next.js API Routes 사용 이유, API 엔드포인트 구조, MySQL 연동 방법
+
+- **[NEXTJS_API_ROUTES_VS_EXPRESS.md](./NEXTJS_API_ROUTES_VS_EXPRESS.md)** - Next.js API Routes vs Express 비교
+  - 왜 별도 Express 서버가 필요 없는지 설명
+
+- **[PREMIUM_CALCULATION_EXPLAINED.md](./PREMIUM_CALCULATION_EXPLAINED.md)** - 보험료 계산 과정 설명
+  - 데이터 조회, 계산 로직, UI 표시 과정
+
+### 운영 가이드 문서
+- **[PREMIUM_UPDATE_GUIDE.md](./PREMIUM_UPDATE_GUIDE.md)** - 보험료 데이터 업데이트 가이드
+  - 보험료 변경 시 주의사항, 버전 관리 방법, 데이터 삭제 금지 원칙
+
+- **[WORK_LOG.md](./WORK_LOG.md)** - 작업 이력 로그
+  - 프로젝트 진행 과정, 주요 변경사항, 기술적 결정 사항 기록
+
+### 참고 문서 (과거 마이그레이션 기록)
+- **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Supabase → MySQL 마이그레이션 요약
+  - 마이그레이션 배경, 주요 변경사항, 스키마 변환 내용
+
+- **[supabase-schema.sql](./supabase-schema.sql)** - Supabase 스키마 (참고용)
+  - 마이그레이션 전 PostgreSQL 스키마 (현재는 사용하지 않음)
+
+### 로고 관련 문서
+- **[LOGO_GUIDE.md](./LOGO_GUIDE.md)** - DB손보 로고 가이드 (통합)
+  - Next.js Image 컴포넌트 사용법, 외부 URL 사용, 투명 배경 로고, SVG 로고
+  - 선명도 개선, 크기 조정, 호버 효과, 다크 모드 대응
+
+---
+
+## 12) 개발 이력
 ### 2026-01-26 - Node.js 버전 요구사항 문서화 및 개발 환경 설정 가이드 추가
 #### Node.js 버전 요구사항
 - **문제**: Next.js는 Node.js 20.9.0 이상이 필요하나, 기본 Node.js 버전이 18.20.8인 경우 발생
@@ -726,5 +774,5 @@ nvm use
 - **배포 옵션 비교표**: 설정 난이도, 비용, 관리 복잡도 비교
 
 #### 수정된 파일
-- `docs/supabase-schema.sql`: 보험료 데이터 스키마 추가 (버전 관리 주석 포함)
+- `docs/mysql-schema.sql`: 보험료 데이터 스키마 추가 (버전 관리 주석 포함)
 - `docs/README.md`: 배포 가이드 섹션 추가, 보험료 데이터 스키마 정보 추가

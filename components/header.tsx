@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { Menu, X, Phone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -19,13 +20,24 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 sm:h-20 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <img 
-              src="/images/db-logo.png" 
-              alt="DB손해보험" 
-              className="h-10 sm:h-12 md:h-14 w-auto"
+          <Link 
+            href="/" 
+            className="flex items-center transition-transform hover:scale-105 active:scale-95"
+          >
+            <Image
+              src="/images/new2023_logo (1).png"
+              alt="DB손해보험"
+              width={140}
+              height={56}
+              className="h-9 sm:h-10 md:h-12 w-auto object-contain"
+              priority
+              quality={100}
+              style={{
+                imageRendering: 'crisp-edges',
+                filter: 'contrast(1.1) saturate(1.05)',
+              }}
             />
           </Link>
 

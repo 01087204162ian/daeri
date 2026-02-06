@@ -30,6 +30,16 @@ async function postJson(url: string, data: Record<string, any>): Promise<AligoRe
   }
 
   if (!res.ok) return { ok: false, error: `HTTP ${res.status}`, raw: parsed };
+  
+  // 알리고 API 응답 확인: result_code가 0이 아니면 실패
+  if (typeof parsed === "object" && parsed !== null && "result_code" in parsed) {
+    const resultCode = (parsed as any).result_code;
+    if (resultCode !== 0 && resultCode !== "0") {
+      const message = (parsed as any).message || `result_code: ${resultCode}`;
+      return { ok: false, error: message, raw: parsed };
+    }
+  }
+  
   return { ok: true, raw: parsed };
 }
 
@@ -56,6 +66,16 @@ async function postForm(url: string, params: Record<string, string>): Promise<Al
   }
 
   if (!res.ok) return { ok: false, error: `HTTP ${res.status}`, raw: parsed };
+  
+  // 알리고 API 응답 확인: result_code가 0이 아니면 실패
+  if (typeof parsed === "object" && parsed !== null && "result_code" in parsed) {
+    const resultCode = (parsed as any).result_code;
+    if (resultCode !== 0 && resultCode !== "0") {
+      const message = (parsed as any).message || `result_code: ${resultCode}`;
+      return { ok: false, error: message, raw: parsed };
+    }
+  }
+  
   return { ok: true, raw: parsed };
 }
 

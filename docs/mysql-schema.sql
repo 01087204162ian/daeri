@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS applications (
   address_detail VARCHAR(200),
   is_same_person BOOLEAN NOT NULL DEFAULT TRUE,
   contractor_name VARCHAR(100),
+  contractor_phone VARCHAR(20),
   bank_name VARCHAR(50),
   consent_privacy BOOLEAN NOT NULL DEFAULT FALSE,
   ip VARCHAR(45),
