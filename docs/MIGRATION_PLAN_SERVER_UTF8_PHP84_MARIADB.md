@@ -50,6 +50,7 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 ### 3.2 현재 daeri 기능·API 정리
 - [ ] **API 목록**: `GET /api/premium-rates`, `POST /api/consultations`, `POST /api/applications` 등 요청/응답 스펙 정리
 - [ ] **페이지 목록**: 보험료 산출, 상담신청, 가입신청, 파트너(쿠키) 등 화면·플로우 정리
+- [ ] **현재 프론트 구조**: 페이지·컴포넌트·기술 스택 목록 정리 (아래 "6.0 현재 프론트 구조" 참고 후 체크리스트화)
 - [ ] **외부 연동**: 알리고(SMS) 등 — PHP에서 호출 가능한지 확인
 
 ### 3.3 MariaDB 10.x·스키마 호환성
@@ -97,6 +98,25 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 
 ## 6. Phase 3: 프론트엔드 전환 (Cafe24) — **정적 HTML/JS + PHP API**
 
+### 6.0 현재 프론트 구조 (전환 검토용)
+
+- **페이지**: **단일 페이지** (`app/page.tsx`) — 스크롤 시 아래 순서로 노출
+- **섹션·컴포넌트**:
+  | 순서 | 컴포넌트 | 역할 | API/기능 |
+  |------|----------|------|----------|
+  | 1 | Header | 상단 네비·로고 | — |
+  | 2 | HeroSection | 메인 비주얼·카피 | — |
+  | 3 | PremiumCalculator | 보험료 산출 | GET /api/premium-rates, 나이대·담보 선택, 계산 로직 |
+  | 4 | ProductCards | 상품 카드 | — |
+  | 5 | ServiceTypeSection | 서비스 유형 안내 | — |
+  | 6 | ApplicationForm | 가입신청 폼 | POST /api/applications, 폼 유효성·주민번호 검증 |
+  | 7 | ConsultationCTA | 상담 신청 CTA | POST /api/consultations 연동 가능 |
+  | 8 | Footer | 하단 | — |
+- **기술 스택**: Next.js 16, React 19, TypeScript, **Tailwind CSS**, **Radix UI**(shadcn/ui 스타일), **lucide-react** 아이콘, **sonner** 토스트, **@hookform/resolvers**
+- **클라이언트 로직**: 보험료 계산(나이대별·담보별 합산), 주민번호 유효성 검사(`lib/resident-number`), 폼 제출·에러·로딩 상태, 파트너 쿠키(쿼리 `?partner=`)
+
+→ **정적 HTML/JS 전환 시** 위 섹션·로직·스타일을 HTML/CSS/JS로 재구현하거나 단순화할 범위를 사전에 정해야 함.
+
 ### 6.1 전환 방식 (채택)
 - **정적 HTML/JS + PHP API** 사용.
 - 화면: **정적 HTML + JavaScript** (Cafe24 웹루트에 업로드).
@@ -113,6 +133,23 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 - [ ] HTML·JS 파일 저장 시 **UTF-8** 인코딩
 - [ ] fetch 요청/응답은 UTF-8 (PHP API는 `Content-Type: application/json; charset=utf-8` 응답)
 - [ ] 폼이 HTML form submit이면 `accept-charset="UTF-8"` 명시; **JS fetch 사용 시** body를 UTF-8로 전송
+
+### 6.4 프론트 개발 검토 항목
+
+전환 시 **프론트 개발**에서 반드시 검토·결정할 항목입니다.
+
+| 구분 | 검토 항목 | 비고 |
+|------|-----------|------|
+| **UI/UX 동등성** | 현재 화면(헤더·히어로·보험료 산출·상품 카드·가입 폼·상담 CTA·푸터)과 동일한 레이아웃·흐름을 유지할지, 단순화할지 결정 | 동일 유지 시 작업량·일정 재산정 |
+| **스타일링** | Tailwind → 정적 환경에서 **Tailwind 빌드 산출물(CSS)** 사용 vs **순수 CSS** 재작성 vs **Tailwind CDN** | Cafe24 업로드 제한·캐시 고려 |
+| **폰트·아이콘** | Geist 폰트, lucide 아이콘 → 웹폰트/CDN 또는 시스템 폰트·이미지/SVG로 대체 | 로딩·저작권 확인 |
+| **클라이언트 로직** | 보험료 계산(나이대·담보별 합산), 주민번호 유효성 검사 → **JS로 그대로 이식** (로직 문서화 후 구현) | `lib/premium-data-client`, `lib/resident-number` 참고 |
+| **폼 유효성·에러·로딩** | 필수값, 형식(휴대폰·주민번호), 동의 체크 — **JS 검증** + API 오류 시 **메시지 표시** (토스트 대신 alert 또는 인라인 메시지) | sonner 대체 방식 결정 |
+| **반응형·접근성** | 모바일/데스크톱 대응, 포커스·라벨·aria 등 — 정적 HTML/JS에서 유지할 수준 정의 | 미대응 시 범위 명시 |
+| **메타·SEO** | title, description, og 태그 — 정적 HTML `<head>` 또는 PHP 진입 페이지에서 출력 | layout.tsx metadata 이식 |
+| **로고·이미지** | icon, apple-icon, 로고 이미지 — 경로·파일 업로드 위치 (Cafe24 웹루트 기준) | LOGO_GUIDE.md 참고 |
+
+- **Phase 0 또는 Phase 3 시작 전** 위 항목을 결정해 두면, 정적 HTML/JS 구현 범위와 일정이 명확해집니다.
 
 ---
 
