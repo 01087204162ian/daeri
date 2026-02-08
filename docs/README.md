@@ -138,6 +138,7 @@ npm run dev
 
 ### 참고 문서
 - **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Supabase → MySQL 마이그레이션 기록
+- **[MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md](./MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md)** - 서버 환경 변경(UTF-8, PHP 8.4, MariaDB 10.x) 마이그레이션 계획
 - **[supabase-schema.sql](./supabase-schema.sql)** - Supabase 스키마 (참고용)
 
 ---
