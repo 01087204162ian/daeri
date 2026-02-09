@@ -23,6 +23,13 @@ return [
     // 파트너 기본값 (URL/쿠키에 partner 없을 때)
     'default_partner_code' => 'default',
 
+    // 필드 암호화 키 (AES-256-GCM, base64 32바이트)
+    // 생성: openssl rand -base64 32
+    'field_encryption_key' => '여기에_32바이트_base64_키',
+
+    // 담당자 수신번호 (선택사항, SMS 발송용)
+    'operator_phone' => '',
+
     // 알리고 SMS (직접 API 호출 시)
     'aligo' => [
         'sms_url'   => 'https://apis.aligo.in/send/',

@@ -63,37 +63,46 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 ## 4. Phase 1: MariaDB 10.x 및 UTF-8 (DB)
 
 ### 4.1 DB 생성 및 스키마 (Cafe24 MariaDB 10.x)
-- [ ] Cafe24에서 DB 생성 (또는 제공되는 DB 사용), **문자셋 utf8mb4, 콜레이션 utf8mb4_unicode_ci**
-- [ ] `docs/mysql-schema.sql` 적용 (MariaDB 문법에 맞게 수정 후 적용)
-- [ ] 기존 데이터가 있으면 dump → import (utf8mb4 유지)
+- [x] Cafe24에서 DB 생성 (또는 제공되는 DB 사용), **문자셋 utf8mb4, 콜레이션 utf8mb4_unicode_ci** ✅ **완료** (2026-02-09)
+- [x] `schema-mariadb-10.6.sql` 적용 (MariaDB 10.6 호환, 한글 컬럼명 → ASCII로 수정) ✅ **완료** (2026-02-09)
+- [x] 기존 데이터가 있으면 dump → import (utf8mb4 유지) ✅ **완료** (partners 1행, premium_rates 18행)
 
 ### 4.2 연결 정보 확정
-- [ ] PHP에서 사용할 **DB 호스트, 포트, DB명, 사용자, 비밀번호** 확정
-- [ ] PHP PDO/MySQLi 연결 시 **charset=utf8mb4** 설정
+- [x] PHP에서 사용할 **DB 호스트, 포트, DB명, 사용자, 비밀번호** 확정 ✅ **완료** (`/home/mr4989/config.php`에 설정)
+- [x] PHP PDO/MySQLi 연결 시 **charset=utf8mb4** 설정 ✅ **완료** (config.php에 charset: 'utf8mb4' 명시)
 
 ---
 
 ## 5. Phase 2: 백엔드 PHP 8.4 재구현
 
 ### 5.1 재구현 범위
-| 기존 (Next.js API) | 전환 (PHP 8.4) |
-|--------------------|-----------------|
-| `GET /api/premium-rates` | PHP: 보험료 조회 (DB 연동, JSON 응답) |
-| `POST /api/consultations` | PHP: 상담신청 저장, SMS(알리고) 호출 |
-| `POST /api/applications` | PHP: 가입신청 저장(비민감·민감 암호화), SMS 호출 |
-| `lib/mysql.ts` | PHP: PDO/MySQLi, utf8mb4 연결 |
-| `lib/crypto.ts` (AES-256-GCM) | PHP: OpenSSL 등 동일 방식 암복호 |
-| `lib/aligo.ts` | PHP: cURL 등으로 알리고 API 호출 |
+| 기존 (Next.js API) | 전환 (PHP 8.4) | 상태 |
+|--------------------|-----------------|------|
+| `GET /api/premium-rates` | PHP: 보험료 조회 (DB 연동, JSON 응답) | ✅ 완료 |
+| `POST /api/consultations` | PHP: 상담신청 저장, SMS(알리고) 호출 | ✅ 완료 |
+| `POST /api/applications` | PHP: 가입신청 저장(비민감·민감 암호화), SMS 호출 | ✅ 완료 |
+| `lib/mysql.ts` | PHP: PDO/MySQLi, utf8mb4 연결 | ✅ 완료 (`lib/db.php`) |
+| `lib/crypto.ts` (AES-256-GCM) | PHP: OpenSSL 등 동일 방식 암복호 | ✅ 완료 (`lib/crypto.php`) |
+| `lib/aligo.ts` | PHP: cURL 등으로 알리고 API 호출 | ✅ 완료 (`lib/aligo.php`) |
 
-### 5.2 PHP 구조(안)
-- **디렉터리**: Cafe24 웹루트 기준 예) `api/premium-rates.php`, `api/consultations.php`, `api/applications.php`
-- **공통**: DB 연결(utf8mb4), 환경변수 또는 설정 파일, 암호화/알리고 공통 함수
-- **응답**: `Content-Type: application/json; charset=utf-8`, JSON 인코딩 시 UTF-8
+### 5.2 PHP 구조
+- **디렉터리**: `/mr4989/www/api/` (premium-rates.php, consultations.php, applications.php) ✅
+- **공통 라이브러리**: `/mr4989/www/lib/` (db.php, crypto.php, aligo.php, context.php) ✅
+- **설정**: `/mr4989/config.php` (웹루트 상위) ✅
+- **응답**: `Content-Type: application/json; charset=utf-8`, JSON 인코딩 시 UTF-8 ✅
+- **폴더 구조 조정**: api와 lib 폴더를 www 폴더 안으로 이동 완료 (2026-02-10) ✅
 
 ### 5.3 PHP 8.4 호환
-- [ ] 제거/변경된 함수 사용 여부 없음 (each, create_function 등)
-- [ ] 타입·널 처리 등 PHP 8.x 문법 준수
-- [ ] 알리고·암호화 등 확장(OpenSSL, cURL) Cafe24에서 사용 가능 여부 확인
+- [x] 제거/변경된 함수 사용 여부 없음 (each, create_function 등) ✅
+- [x] 타입·널 처리 등 PHP 8.x 문법 준수 ✅
+- [x] 알리고·암호화 등 확장(OpenSSL, cURL) Cafe24에서 사용 가능 ✅
+
+### 5.4 테스트 결과
+- [x] premium-rates.php: GET 요청 → JSON 응답 정상, 데이터 18행 ✅ (2026-02-09)
+- [x] consultations.php: POST 요청 → DB 저장 성공 (3건 테스트) ✅ (2026-02-09)
+- [x] applications.php: POST 요청 → DB 저장 성공, 암호화 확인 (1건 테스트) ✅ (2026-02-09)
+- [x] 보험료 산출 기능: 정상 작동 확인 ✅ (2026-02-10)
+- [x] 가입신청 API: 정상 작동 확인, 암호화 키 설정 완료 ✅ (2026-02-10)
 
 ---
 
@@ -124,16 +133,29 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 - 데이터·제출: **fetch** 로 **PHP API** (`api/*.php`) 호출 (JSON 요청/응답).
 
 ### 6.2 페이지별 전환
-- [ ] **보험료 산출**: 정적 HTML/JS 페이지 → 산출 시 `GET api/premium-rates.php` (또는 동일 경로) 호출 후 화면에 표시
-- [ ] **상담신청**: 정적 HTML 폼 → JS에서 `POST api/consultations.php` 로 전송 (JSON 또는 FormData)
-- [ ] **가입신청**: 정적 HTML 폼 → JS에서 `POST api/applications.php` 로 전송
+- [x] **보험료 산출**: 정적 HTML/JS 페이지 → 산출 시 `GET api/premium-rates.php` 호출 후 화면에 표시 ✅
+- [x] **상담신청**: 정적 HTML 폼 → JS에서 `POST api/consultations.php` 로 전송 (JSON) ✅
+- [x] **가입신청**: 정적 HTML 폼 → JS에서 `POST api/applications.php` 로 전송 ✅
 - [ ] **파트너(멀티테넌시)**: `?partner=kakao` 진입 시 쿠키 설정이 필요하면 **PHP 진입 페이지 1개** (예: `partner.php?p=kakao` → 쿠키 설정 후 정적 페이지로 리다이렉트) 또는 JS에서 쿠키 설정 후 라우팅
 
 ### 6.3 UTF-8 (프론트)
-- [ ] 모든 **정적 HTML** 에 `<meta charset="UTF-8">` 명시
-- [ ] HTML·JS 파일 저장 시 **UTF-8** 인코딩
-- [ ] fetch 요청/응답은 UTF-8 (PHP API는 `Content-Type: application/json; charset=utf-8` 응답)
-- [ ] 폼이 HTML form submit이면 `accept-charset="UTF-8"` 명시; **JS fetch 사용 시** body를 UTF-8로 전송
+- [x] 모든 **정적 HTML** 에 `<meta charset="UTF-8">` 명시 ✅
+- [x] HTML·JS 파일 저장 시 **UTF-8** 인코딩 ✅
+- [x] fetch 요청/응답은 UTF-8 (PHP API는 `Content-Type: application/json; charset=utf-8` 응답) ✅
+- [x] 폼이 HTML form submit이면 `accept-charset="UTF-8"` 명시; **JS fetch 사용 시** body를 UTF-8로 전송 ✅
+
+### 6.5 Phase 3 완료 (2026-02-10)
+- [x] **index.html**: 기본 HTML 구조 (Header, Hero, Footer 포함) ✅
+- [x] **premium-calculator.js**: 보험료 산출기 로직 (나이대별 계산, 담보 선택, 테이블/카드 표시) ✅
+- [x] **consultation.js**: 상담신청 폼 (전화번호 포맷팅, 유효성 검사, API 연동) ✅
+- [x] **application.js**: 가입신청 폼 (주민번호 검증, 보험료 자동 계산, 계약자 정보, 계좌/카드) ✅
+- [x] **premium-data.js**: 보험료 데이터 fetch 및 계산 함수 ✅
+- [x] **resident-number.js**: 주민번호 유효성 검사 및 나이대 계산 ✅
+- [x] **main.js**: 메인 JavaScript (모바일 메뉴, 부드러운 스크롤) ✅
+- [x] **스타일링**: Tailwind CDN 제거, 순수 CSS (style.css) 사용 ✅
+- [x] **UI/UX**: 기본 레이아웃 및 핵심 기능 구현 완료 ✅
+- [x] **디버깅 및 수정**: 함수 이름 충돌 해결 (calculatePremium → calculatePremiumForTable) ✅
+- [x] **디버깅 코드 제거**: 운영 환경에 적합하도록 콘솔 로그 제거 완료 ✅
 
 ### 6.4 프론트 개발 검토 항목
 
@@ -166,11 +188,11 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 
 ## 8. Phase 5: 통합 테스트
 
-- [ ] 보험료 산출: DB 데이터 정상 노출, 산출 결과 일치
+- [x] 보험료 산출: DB 데이터 정상 노출, 산출 결과 일치 ✅ (2026-02-10)
 - [ ] 상담신청: 저장, SMS 발송, DB/로그 확인
-- [ ] 가입신청: 비민감·민감 저장, 암호화, SMS 발송
+- [x] 가입신청: 비민감·민감 저장, 암호화, SMS 발송 ✅ (2026-02-10)
 - [ ] 파트너(쿠키) 동작
-- [ ] 에러 로그 없음 (PHP, DB, 알리고)
+- [x] 에러 로그 없음 (PHP, DB, 알리고) ✅ (2026-02-10)
 
 ---
 
@@ -208,5 +230,66 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 ---
 
 **작성일**: 2026-02-02  
-**최종 수정**: 2026-02-02 (B안·Cafe24 전용·Vercel·EC2 미사용 반영)  
+**최종 수정**: 2026-02-10 (폴더 구조 조정, 보험료 산출/가입신청 기능 완료, 디버깅 코드 제거)  
 **문서 위치**: `daeri/docs/MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md`
+
+---
+
+## 12. 작업 이력
+
+### 2026-02-11 예정 작업
+
+#### Phase 4: UTF-8 검증 (전 구간)
+- [ ] **DB 문자셋 확인**
+  - `SHOW CREATE DATABASE mr4989;` 실행하여 utf8mb4 확인
+  - `SHOW CREATE TABLE` 각 테이블별 utf8mb4 확인
+- [ ] **PHP–DB 한글 처리 테스트**
+  - 한글 이름, 주소 등 입력 → 저장 → 조회 테스트
+  - 특수문자(이모지 등) 처리 확인
+- [ ] **PHP API JSON 응답 확인**
+  - API 응답에서 한글이 깨지지 않는지 확인
+  - `Content-Type: application/json; charset=utf-8` 헤더 확인
+- [ ] **정적 HTML/JS 페이지 확인**
+  - 화면에 한글, 특수문자 정상 표시 확인
+  - `<meta charset="UTF-8">` 태그 확인
+- [ ] **폼 제출 UTF-8 확인**
+  - POST 데이터가 UTF-8로 전송되는지 확인
+  - 서버에서 UTF-8로 수신되는지 확인
+
+#### Phase 5: 통합 테스트 (나머지)
+- [ ] **상담신청 기능 테스트**
+  - 상담신청 폼 제출 테스트
+  - DB 저장 확인 (`consultations` 테이블)
+  - SMS 발송 확인 (사용자, 담당자)
+  - `message_logs` 테이블 로그 확인
+- [ ] **파트너 쿠키 기능**
+  - `?partner=kakao` 진입 시 쿠키 설정 확인
+  - 파트너별 데이터 분리 저장 확인
+  - 필요 시 `partner.php` 진입 페이지 구현
+
+#### 추가 확인 사항
+- [ ] 전체 기능 종합 테스트 (보험료 산출, 상담신청, 가입신청)
+- [ ] 에러 케이스 테스트 (유효성 검사, 필수값 누락 등)
+- [ ] 모바일/데스크톱 반응형 확인
+
+---
+
+### 2026-02-10 완료 작업
+
+### 폴더 구조 조정
+- `cafe24/api/` → `cafe24/www/api/`로 이동
+- `cafe24/lib/` → `cafe24/www/lib/`로 이동
+- 모든 경로 참조 업데이트 완료
+
+### 보험료 산출 기능 수정
+- 함수 이름 충돌 해결: `calculatePremium()` → `calculatePremiumForTable()` (application.js의 async 함수와 충돌 방지)
+- 보험료 데이터 로딩 및 계산 로직 정상 작동 확인
+
+### 가입신청 API 수정
+- 암호화 키 설정 문제 해결: `config.php`에 `field_encryption_key` 추가
+- 가입신청 API 정상 작동 확인 (응답: 200 OK)
+
+### 코드 정리
+- 디버깅용 console.log 제거 (premium-calculator.js, premium-data.js, application.js)
+- 에러 메시지 단순화 (applications.php, crypto.php)
+- 운영 환경에 적합하도록 코드 정리 완료
