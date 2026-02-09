@@ -1,7 +1,7 @@
 # Phase 1: DB · 스키마 적용
 
 **대상**: Cafe24 MariaDB 10.6 (DB: mr4989, 사용자: mr4989)  
-**스키마 파일**: `schema-mariadb-10.6.sql` (MariaDB 10.6 호환, UUID는 INSERT 시 또는 PHP에서 생성)
+**스키마 파일**: `../schema-mariadb-10.6.sql` (MariaDB 10.6 호환, UUID는 INSERT 시 또는 PHP에서 생성)
 
 ---
 

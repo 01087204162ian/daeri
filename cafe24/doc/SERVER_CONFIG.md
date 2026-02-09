@@ -9,8 +9,8 @@ DB 접속 정보·알리고 API 키 등을 서버에 두는 방법입니다. **P
 Cafe24 PHP 환경에서는 **.env**를 자동으로 읽지 않습니다.  
 설정은 **config.php** 하나로 두고, PHP에서 `require` 로 불러 쓰는 방식을 권장합니다.
 
-- **예시 파일**: `config.sample.php`  
-- **변수 참고용**: `env.sample` (이름만 Next.js .env와 맞춰 둔 목록)
+- **예시 파일**: `../config.sample.php`  
+- **변수 참고용**: `../env.sample` (이름만 Next.js .env와 맞춰 둔 목록)
 
 ---
 

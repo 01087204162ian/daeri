@@ -1,7 +1,7 @@
 # Phase 0: 사전 점검 체크리스트
 
 **작업 폴더**: `daeri/cafe24/`  
-**마이그레이션 계획**: `../docs/MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md`
+**마이그레이션 계획**: `../../docs/MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md`
 
 ---
 
@@ -99,7 +99,7 @@ exit
 
 ## 3.3 MariaDB 10.x·스키마 호환성 ✅
 
-**현재 스키마** (`../docs/mysql-schema.sql`):
+**현재 스키마** (`../../docs/mysql-schema.sql`):
 
 | 항목 | 내용 | MariaDB 10.x 호환 |
 |------|------|-------------------|
@@ -111,14 +111,14 @@ exit
 
 **권장**  
 - Cafe24 MariaDB가 **10.7 미만**이면: 스키마에서 `DEFAULT (UUID())` 제거하고, PHP에서 `uuid` 생성 후 각 INSERT에 값으로 넣기.
-- **한글 컬럼명**(`daemul_3천` 등): 터미널/업로드 인코딩 문제로 1064 발생 가능 → Cafe24용 스키마(`schema-mariadb-10.6.sql`)에서는 **ASCII 컬럼명** 사용: `daemul_3k`, `daemul_5k`, `daemul_1eok`, `daemul_2eok`, `jason_3k`, `jason_5k`, `jason_1eok`, `jacha_1k`, `jacha_2k`, `jacha_3k`. PHP API 응답 시 기존 프론트와 맞추려면 이 컬럼을 `daemul_3천` 등으로 매핑해 JSON 내려주면 됨.
+- **한글 컬럼명**(`daemul_3천` 등): 터미널/업로드 인코딩 문제로 1064 발생 가능 → Cafe24용 스키마(`../schema-mariadb-10.6.sql`)에서는 **ASCII 컬럼명** 사용: `daemul_3k`, `daemul_5k`, `daemul_1eok`, `daemul_2eok`, `jason_3k`, `jason_5k`, `jason_1eok`, `jacha_1k`, `jacha_2k`, `jacha_3k`. PHP API 응답 시 기존 프론트와 맞추려면 이 컬럼을 `daemul_3천` 등으로 매핑해 JSON 내려주면 됨.
 
 ---
 
 ## Phase 0 완료 후
 
 - 3.1 체크 완료·연결 정보 확정됨 → **Phase 1** 진행 가능.
-- **Phase 1**: [PHASE1_DB_APPLY.md](PHASE1_DB_APPLY.md) 참고. `schema-mariadb-10.6.sql` 업로드 후 `mysql -u mr4989 -p mr4989 < schema-mariadb-10.6.sql` 로 적용.
+- **Phase 1**: [PHASE1_DB_APPLY.md](PHASE1_DB_APPLY.md) 참고. `../schema-mariadb-10.6.sql` 업로드 후 `mysql -u mr4989 -p mr4989 < schema-mariadb-10.6.sql` 로 적용.
 - Phase 2(PHP 재구현) 시 PHASE0 체크리스트를 스펙으로 사용.
 
 **작성일**: 2026-02-08
