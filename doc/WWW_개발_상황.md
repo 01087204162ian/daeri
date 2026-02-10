@@ -208,7 +208,7 @@ Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
 - **증상:** `GET http://dbins.kr/images/db-logo.png 404`
 - **원인:** 서버에 `~/www/images/` 또는 `db-logo.png` 없음.
 - **해결:**
-  1. 로컬: `daeri/public/images/db-logo.png` 를 `daeri/www/images/db-logo.png` 로 복사 (또는 공식 URL에서 다운로드).
+  1. 로컬: DB손해보험 공식 로고(예: https://dbinsure.co.kr/images/new2023_logo.png)를 다운로드하여 `daeri/www/images/db-logo.png` 로 저장.
   2. 서버: FTP/SFTP로 `www/images/db-logo.png` 업로드. `mkdir -p ~/www/images` 후 업로드.
   3. 확인: 브라우저에서 `http://dbins.kr/images/db-logo.png` 접속 → 이미지 표시되면 성공.
 
@@ -250,4 +250,4 @@ Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
 
 ---
 
-**마지막 업데이트**: 2026-02-10 (로고·보험료 산출 개선 반영)
+**마지막 업데이트**: 2026-02-10 (로고·보험료 산출·유효성 검사 개선, Next.js 정리 및 `daeri/www` 구조 확정 반영)
