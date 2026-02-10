@@ -26,7 +26,7 @@ function renderApplicationForm() {
                                 </svg>
                             </div>
                         </button>
-                        <div class="application-accordion-content" id="step-1-1">
+                        <div class="application-accordion-content hidden" id="step-1-1">
                             <ul class="application-step-list">
                                 <li>대리 운전자 성명, 주민번호, 우편물 받을 주소, 핸드폰번호</li>
                                 <li>대리 운전자 은행계좌번호 및 은행명</li>
@@ -46,7 +46,7 @@ function renderApplicationForm() {
                                 </svg>
                             </div>
                         </button>
-                        <div class="application-accordion-content" id="step-1-2">
+                        <div class="application-accordion-content hidden" id="step-1-2">
                             <ul class="application-step-list">
                                 <li>대리 운전자 성명, 주민번호, 우편물 받을 주소, 핸드폰번호</li>
                                 <li>계약자 은행계좌번호 및 은행명</li>
@@ -66,7 +66,7 @@ function renderApplicationForm() {
                                 </svg>
                             </div>
                         </button>
-                        <div class="application-accordion-content" id="step-2">
+                        <div class="application-accordion-content hidden" id="step-2">
                             <ul class="application-step-list">
                                 <li>근무시간(09:00~17:00) 이내 신청건은 <span class="application-step-highlight">당일 처리</span></li>
                                 <li>그 외 시간은 익영업일에 처리됩니다</li>
@@ -85,7 +85,7 @@ function renderApplicationForm() {
                                 </svg>
                             </div>
                         </button>
-                        <div class="application-accordion-content" id="step-3">
+                        <div class="application-accordion-content hidden" id="step-3">
                             <div class="application-step-payment">
                                 <span>1회차: <span class="application-step-highlight">25%</span></span>
                                 <span>2~7회: <span class="application-step-highlight">10%</span></span>
@@ -105,7 +105,7 @@ function renderApplicationForm() {
                                 </svg>
                             </div>
                         </button>
-                        <div class="application-accordion-content" id="step-4">
+                        <div class="application-accordion-content hidden" id="step-4">
                             <ul class="application-step-list">
                                 <li>보험계약 완료 시 운전자님 핸드폰으로 증권번호 발송</li>
                                 <li>담당자 핸드폰으로도 증권번호 발송</li>
@@ -128,7 +128,7 @@ function renderApplicationForm() {
                                 </svg>
                             </div>
                         </button>
-                        <div class="application-accordion-content" id="step-cancel">
+                        <div class="application-accordion-content hidden" id="step-cancel">
                             <ul class="application-step-list">
                                 <li>계약자, 운전자 신분증을 찍어서 <span class="application-step-highlight">010-4819-0574</span>로 전송</li>
                                 <li>사고가 없으면 일할계산하여 보험료 환급</li>
