@@ -6,11 +6,11 @@ let premiumData = [];
 let loading = false;
 let calculated = false;
 
-// 상태
+// 상태 — 기본: 대인 책임초과무한, 대물 1억, 자손 3천, 자차 3천
 let daein = '책임초과무한'; // 책임초과무한 = 대인2, 책임포함무한 = 대인2+대인1특약
-let daemul = '3천';
+let daemul = '1억';
 let jason = '3천';
-let jacha = '1천';
+let jacha = '3천';
 let rentCost = false; // 렌트비용
 let legalCost = true; // 법률비용 (기본값: 포함)
 
@@ -321,7 +321,7 @@ function renderPremiumCalculator() {
         </div>
     `;
 
-    // 이벤트 리스너
+    // 이벤트 리스너 및 기본값 반영
     const daeinSelect = document.getElementById('daein-select');
     const daemulSelect = document.getElementById('daemul-select');
     const jasonSelect = document.getElementById('jason-select');
@@ -329,13 +329,24 @@ function renderPremiumCalculator() {
     const rentCostCheck = document.getElementById('rent-cost');
     const legalCostCheck = document.getElementById('legal-cost');
     const calculateBtn = document.getElementById('calculate-btn');
-    
-    if (daeinSelect) daeinSelect.addEventListener('change', (e) => { daein = e.target.value; });
-    if (daemulSelect) daemulSelect.addEventListener('change', (e) => { daemul = e.target.value; });
-    if (jasonSelect) jasonSelect.addEventListener('change', (e) => { jason = e.target.value; });
-    if (jachaSelect) jachaSelect.addEventListener('change', (e) => { jacha = e.target.value; });
-    if (rentCostCheck) rentCostCheck.addEventListener('change', (e) => { rentCost = e.target.checked; });
-    if (legalCostCheck) legalCostCheck.addEventListener('change', (e) => { legalCost = e.target.checked; });
+    if (daeinSelect) daeinSelect.value = daein;
+    if (daemulSelect) daemulSelect.value = daemul;
+    if (jasonSelect) jasonSelect.value = jason;
+    if (jachaSelect) jachaSelect.value = jacha;
+    if (rentCostCheck) rentCostCheck.checked = rentCost;
+    if (legalCostCheck) legalCostCheck.checked = legalCost;
+
+    /** 담보 변경 시 변수 갱신 + 이미 산출된 상태면 결과만 다시 계산 */
+    const onCoverageChange = (update) => {
+        update();
+        if (calculated && premiumData.length > 0) updateResults();
+    };
+    if (daeinSelect) daeinSelect.addEventListener('change', (e) => onCoverageChange(() => { daein = e.target.value; }));
+    if (daemulSelect) daemulSelect.addEventListener('change', (e) => onCoverageChange(() => { daemul = e.target.value; }));
+    if (jasonSelect) jasonSelect.addEventListener('change', (e) => onCoverageChange(() => { jason = e.target.value; }));
+    if (jachaSelect) jachaSelect.addEventListener('change', (e) => onCoverageChange(() => { jacha = e.target.value; }));
+    if (rentCostCheck) rentCostCheck.addEventListener('change', (e) => onCoverageChange(() => { rentCost = e.target.checked; }));
+    if (legalCostCheck) legalCostCheck.addEventListener('change', (e) => onCoverageChange(() => { legalCost = e.target.checked; }));
     if (calculateBtn) calculateBtn.addEventListener('click', handleCalculate);
 }
 
