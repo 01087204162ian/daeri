@@ -170,7 +170,7 @@ Cafe24는 **Node.js 미지원**이므로, **현재 구조 그대로는 Cafe24에
 | **폼 유효성·에러·로딩** | 필수값, 형식(휴대폰·주민번호), 동의 체크 — **JS 검증** + API 오류 시 **메시지 표시** (토스트 대신 alert 또는 인라인 메시지) | sonner 대체 방식 결정 |
 | **반응형·접근성** | 모바일/데스크톱 대응, 포커스·라벨·aria 등 — 정적 HTML/JS에서 유지할 수준 정의 | 미대응 시 범위 명시 |
 | **메타·SEO** | title, description, og 태그 — 정적 HTML `<head>` 또는 PHP 진입 페이지에서 출력 | layout.tsx metadata 이식 |
-| **로고·이미지** | icon, apple-icon, 로고 이미지 — 경로·파일 업로드 위치 (Cafe24 웹루트 기준) | LOGO_GUIDE.md 참고 |
+| **로고·이미지** | icon, apple-icon, 로고 이미지 — 경로·파일 업로드 위치 (Cafe24 웹루트 기준) | cafe24/doc/WWW_개발_상황.md §12 참고 |
 
 - **Phase 0 또는 Phase 3 시작 전** 위 항목을 결정해 두면, 정적 HTML/JS 구현 범위와 일정이 명확해집니다.
 

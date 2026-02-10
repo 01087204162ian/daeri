@@ -134,7 +134,7 @@ npm run dev
 ### 운영 가이드
 - **[PREMIUM_UPDATE_GUIDE.md](./PREMIUM_UPDATE_GUIDE.md)** - 보험료 데이터 업데이트
 - **[WORK_LOG.md](./WORK_LOG.md)** - 작업 이력 로그
-- **[LOGO_GUIDE.md](./LOGO_GUIDE.md)** - 로고 가이드
+- **로고·이미지 (Cafe24 www)** — [cafe24/doc/WWW_개발_상황.md](../cafe24/doc/WWW_개발_상황.md) §12
 
 ### 참고 문서
 - **[MIGRATION_SUMMARY.md](./MIGRATION_SUMMARY.md)** - Supabase → MySQL 마이그레이션 기록

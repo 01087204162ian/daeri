@@ -1,4 +1,4 @@
-git # www 개발 상황 — Cafe24 daeri 통합 문서
+# www 개발 상황 — Cafe24 daeri 통합 문서
 
 **진행 폴더**: `daeri/cafe24/`  
 **계획서**: `../../docs/MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md`
@@ -169,6 +169,46 @@ git # www 개발 상황 — Cafe24 daeri 통합 문서
 ### 5단계: 정리
 - Console에 빨간 에러 없음, Network에서 API 호출이 모두 200인지 최종 확인.
 - (선택) DB에서 consultations / applications 마지막 행 확인.
+
+---
+
+## 12. 로고·이미지 가이드 (Cafe24 www)
+
+Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
+
+### 로고·이미지 경로
+
+| 용도 | HTML에서 쓰는 경로 | 로컬 파일 위치 | 서버 업로드 위치 |
+|------|---------------------|-----------------|-------------------|
+| 헤더 로고 | `/images/db-logo.png` | `daeri/cafe24/www/images/db-logo.png` | `~/www/images/db-logo.png` |
+| Favicon | `/favicon.svg` | `daeri/cafe24/www/favicon.svg` | `~/www/favicon.svg` |
+
+- index.html 에서 `src="/images/db-logo.png"` 로 참조. DOCUMENT_ROOT가 `/home/mr4989/www` 이면 `http://dbins.kr/images/db-logo.png` → 서버 **`/home/mr4989/www/images/db-logo.png`** 를 찾음.
+
+### 404 (Not Found) 나올 때
+
+- **증상:** `GET http://dbins.kr/images/db-logo.png 404`
+- **원인:** 서버에 `~/www/images/` 또는 `db-logo.png` 없음.
+- **해결:**
+  1. 로컬: `daeri/public/images/db-logo.png` 를 `daeri/cafe24/www/images/db-logo.png` 로 복사 (또는 공식 URL에서 다운로드).
+  2. 서버: FTP/SFTP로 `www/images/db-logo.png` 업로드. `mkdir -p ~/www/images` 후 업로드.
+  3. 확인: 브라우저에서 `http://dbins.kr/images/db-logo.png` 접속 → 이미지 표시되면 성공.
+
+### Favicon
+
+- **파일:** `daeri/cafe24/www/favicon.svg`. index.html 에 `<link rel="icon" type="image/svg+xml" href="/favicon.svg">` 반영됨.
+- 서버에는 `~/www/favicon.svg` 로 업로드.
+
+### 로고 스펙
+
+- **권장:** 투명 배경 PNG. 공식 참고: https://dbinsure.co.kr/images/new2023_logo.png
+- 헤더 크기: CSS `.logo-img` (style.css). 현재 반응형: 모바일 3rem, 640px+ 3.75rem, 768px+ 4.25rem (우측 메뉴 대비 비율 맞춤).
+
+### 전체 분위기와 로고 맞추기
+
+- **증상:** 로고만 작게 보이고 흰 배경에 떠 있는 느낌.
+- **대응:** (1) 로고 크기 조정 — `.logo-img` 상향 (2) 헤더 구분감 — `box-shadow` 등 (3) 로고 버전 — 컬러/단색 선택 (4) 맥락 문구 — "대리운전 보험" 등.
+- **적용됨:** style.css 에 header `box-shadow`, `.logo-img` 크기 반영해 둠. 추가 조정은 위 "전체 분위기와 로고 맞추기" 대응 방향 참고.
 
 ---
 
