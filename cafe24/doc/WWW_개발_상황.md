@@ -1,4 +1,4 @@
-# www 개발 상황 — Cafe24 daeri 통합 문서
+git # www 개발 상황 — Cafe24 daeri 통합 문서
 
 **진행 폴더**: `daeri/cafe24/`  
 **계획서**: `../../docs/MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md`
@@ -142,6 +142,33 @@
         ├── consultations.php
         └── applications.php
 ```
+
+---
+
+## 11. Chrome 리얼 테스트 계획 (직접 수행용)
+
+아래 순서대로 브라우저에서 진행. F12 → Network(및 Console) 탭 열어 두고 확인.
+
+### 1단계: 메인 페이지 로드
+- **URL**: `http://dbins.kr/` (또는 `https://dbins.kr/`)
+- **할 일**: 접속만.
+- **확인**: 페이지가 깨지지 않고 로드되는지, Console에 404/500 없음, 필요한 js·css·이미지가 200으로 로드되는지.
+
+### 2단계: 보험료 산출
+- **할 일**: 보험 종목 선택(대리/탁송/확대탁송), 생년월일(또는 나이대) 입력, 담보 선택 후 보험료 계산/표시되는지 확인.
+- **확인**: Network에서 `premium-rates.php` 또는 `calculate-premium` 호출이 200, 응답에 `ok: true`, `data` 있는지. 계산 결과 금액이 화면에 맞게 나오는지.
+
+### 3단계: 상담 신청
+- **할 일**: 상담 신청 폼에 이름·전화번호·내용 입력, 개인정보 동의 체크 후 제출.
+- **확인**: Network에서 `consultations.php` POST 200, 응답 `{"ok":true,"id":"..."}`. 제출 후 안내 메시지/이동이 있는지.
+
+### 4단계: 가입 신청
+- **할 일**: 가입 신청 폼에 보험 종목·이름·전화·주민번호·주소·은행·계좌번호·동의 등 필수 입력 후 제출.
+- **확인**: Network에서 `applications.php` POST 200, 응답 `{"ok":true,"id":"..."}`. 제출 후 안내 메시지/이동이 있는지. (에러 시 응답 body에 error·message 확인.)
+
+### 5단계: 정리
+- Console에 빨간 에러 없음, Network에서 API 호출이 모두 200인지 최종 확인.
+- (선택) DB에서 consultations / applications 마지막 행 확인.
 
 ---
 

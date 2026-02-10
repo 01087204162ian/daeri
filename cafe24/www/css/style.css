@@ -1901,10 +1901,23 @@ footer {
     color: var(--muted-foreground);
 }
 
-/* Application Form Section */
+/* Application Form Section — 다른 섹션과 폭 맞춤 */
+#apply .container {
+    overflow-x: hidden;
+}
+#apply #application-form-container {
+    min-width: 0;
+    max-width: 100%;
+}
 .application-grid {
     display: grid;
     gap: 2.5rem;
+    min-width: 0;
+    max-width: 100%;
+}
+.application-grid > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 @media (min-width: 1024px) {
@@ -1914,7 +1927,53 @@ footer {
     }
 }
 
+/* 가입신청 섹션 반응형: 모바일 우선 */
+@media (max-width: 639px) {
+    .application-form-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.375rem;
+    }
+    .application-form-label {
+        width: 100%;
+    }
+    .application-form-label-top {
+        padding-top: 0;
+    }
+    .application-form-group {
+        width: 100%;
+    }
+    .application-form-resident-group {
+        flex-wrap: nowrap;
+        min-width: 0;
+    }
+    .application-form-resident-group .application-form-input {
+        min-width: 0;
+    }
+    .application-form-error,
+    .application-form-info {
+        margin-left: 0;
+    }
+    .application-step-label {
+        font-size: 0.8125rem;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+    }
+    .application-accordion-trigger {
+        padding: 0.875rem 0;
+    }
+    .application-form-card,
+    .application-steps-card {
+        padding: 1rem;
+    }
+}
+
 /* Application Steps Card */
+.application-steps-card,
+.application-form-card {
+    overflow-wrap: break-word;
+    overflow-x: hidden;
+}
 .application-steps-card {
     border-radius: 1rem;
     border: 1px solid var(--border);
@@ -2067,6 +2126,7 @@ footer {
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
+    min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -2102,6 +2162,8 @@ footer {
 
 .application-form-group {
     flex: 1;
+    min-width: 0;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -2112,6 +2174,12 @@ footer {
     align-items: center;
     gap: 0.5rem;
     flex: 1;
+    min-width: 0;
+    max-width: 100%;
+}
+.application-form-resident-group .application-form-input {
+    min-width: 0;
+    flex: 1 1 0;
 }
 
 .application-form-dash {
