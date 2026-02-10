@@ -9,6 +9,21 @@
  * - 민감정보(application_secrets 테이블의 암호문)는 이 API에서 노출하지 않음
  */
 
+// CORS (react.disk-cms.simg.kr 에서만 허용)
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin === 'https://react.disk-cms.simg.kr') {
+    header("Access-Control-Allow-Origin: $origin");
+    header('Vary: Origin');
+}
+header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
+// 프리플라이트 요청 처리
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../../lib/db.php';
