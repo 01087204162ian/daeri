@@ -632,27 +632,78 @@ async function handleApplicationSubmit(e) {
     };
 
     // 유효성 검사
+    // 1) 보험유형
     if (!formData.insuranceType) {
         if (errorDiv) {
-            errorDiv.textContent = '보험 유형을 선택해주세요';
+            errorDiv.textContent = '보험유형을 선택해주세요.';
             errorDiv.classList.remove('hidden');
         }
         return;
     }
 
+    // 2) 성명
+    if (!formData.name || formData.name.length > 50) {
+        if (errorDiv) {
+            errorDiv.textContent = '대리기사 성명을 정확히 입력해주세요. (최대 50자)';
+            errorDiv.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // 3) 연락처 (010-0000-0000 형식, 숫자 10~11자리)
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+        if (errorDiv) {
+            errorDiv.textContent = '연락처를 정확히 입력해주세요. (예: 010-1234-5678)';
+            errorDiv.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // 4) 주민번호 (주 운전자)
     const residentValidation = validateResidentNumber(formData.residentNumber1, formData.residentNumber2);
     if (!residentValidation.isValid) {
         if (errorDiv) {
-            errorDiv.textContent = residentValidation.error || '주민번호가 올바르지 않습니다';
+            errorDiv.textContent = residentValidation.error || '주민번호가 올바르지 않습니다.';
             errorDiv.classList.remove('hidden');
         }
         return;
     }
 
+    // 5) 주소
+    if (!formData.address) {
+        if (errorDiv) {
+            errorDiv.textContent = '주소(기본 주소)를 입력해주세요.';
+            errorDiv.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // 6) 은행 / 계좌번호
+    if (!formData.bankName || !formData.accountNumber) {
+        if (errorDiv) {
+            errorDiv.textContent = '은행명과 계좌번호를 모두 입력해주세요.';
+            errorDiv.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // 7) 보험료 (년보험료 / 1회보험료) – 숫자, 0보다 커야 함
+    const yearlyPremiumNumber = Number(formData.yearlyPremium);
+    const firstPremiumNumber = Number(formData.firstPremium);
+    if (!yearlyPremiumNumber || !firstPremiumNumber || yearlyPremiumNumber <= 0 || firstPremiumNumber <= 0) {
+        if (errorDiv) {
+            errorDiv.textContent = '주민번호 입력 후 보험료 산출을 먼저 진행해주세요.';
+            errorDiv.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // 8) 계약자 정보 (대리기사 ≠ 계약자)
     if (!formData.isSamePerson) {
         if (!formData.contractorName || !formData.contractorPhone || !formData.contractorResidentNumber1 || !formData.contractorResidentNumber2) {
             if (errorDiv) {
-                errorDiv.textContent = '계약자 정보를 모두 입력해주세요';
+                errorDiv.textContent = '계약자 정보를 모두 입력해주세요.';
                 errorDiv.classList.remove('hidden');
             }
             return;
@@ -660,11 +711,20 @@ async function handleApplicationSubmit(e) {
         const contractorValidation = validateResidentNumber(formData.contractorResidentNumber1, formData.contractorResidentNumber2);
         if (!contractorValidation.isValid) {
             if (errorDiv) {
-                errorDiv.textContent = '계약자 주민번호가 올바르지 않습니다';
+                errorDiv.textContent = contractorValidation.error || '계약자 주민번호가 올바르지 않습니다.';
                 errorDiv.classList.remove('hidden');
             }
             return;
         }
+    }
+
+    // 9) 개인정보 동의
+    if (!formData.consentPrivacy) {
+        if (errorDiv) {
+            errorDiv.textContent = '개인정보 수집 및 이용에 동의해 주세요.';
+            errorDiv.classList.remove('hidden');
+        }
+        return;
     }
 
     if (submitBtn) {
