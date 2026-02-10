@@ -2,7 +2,7 @@
 
 Next.js daeri를 **Cafe24** 환경(PHP 8.4 + MariaDB)으로 이전하는 작업 폴더입니다.
 
-- **문서·체크리스트·작업 로그**: [doc/](doc/)
+- **www 개발 상황 (통합 문서)**: [doc/WWW_개발_상황.md](doc/WWW_개발_상황.md)
 - **스키마**: [schema-mariadb-10.6.sql](schema-mariadb-10.6.sql)  
 - **설정 예시**: [config.sample.php](config.sample.php), [env.sample](env.sample)
 
