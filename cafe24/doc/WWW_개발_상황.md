@@ -25,9 +25,7 @@
 |-----|------|------|
 | GET /api/premium-rates.php | ✅ 200 | `{"ok":true,"data":[...]}`, 한글 키(daemul_3천 등) 정상 |
 | POST /api/consultations.php | ✅ 200 | `{"ok":true,"id":"..."}` |
-| POST /api/applications.php | ⚠️ 오류 | `field_encryption_key` 없음 → config.php에 추가 필요 |
-
-**가입 신청(applications) 정상화**: 서버 config.php에 `field_encryption_key`(base64 32바이트) 설정. 생성 예: `openssl rand -base64 32`
+| POST /api/applications.php | ✅ 적용 완료 | config.php(필드 암호화 키 포함) 어제(2/10) 서버 반영 완료 |
 
 ---
 
@@ -55,7 +53,8 @@
 
 ### 2026-02-10
 
-- (이 날짜 작업 있으면 여기 기록)
+- **config.php** 서버 적용: DB·알리고·**field_encryption_key**(민감정보 암호화) 등 설정 완료.
+- 보험료 산출·가입 신청 흐름 구현·동작. API 테스트(premium-rates, consultations 정상; applications는 config 반영 후 사용).
 
 ---
 
