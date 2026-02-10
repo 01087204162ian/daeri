@@ -75,8 +75,12 @@ function getPremium(data, insuranceType, ageGroup, coverage) {
     }
 }
 
+/** 일시납 → 10회 납 적용 계수 (통상 10회 납 기준으로 표시) */
+const PREMIUM_INSTALLMENT_FACTOR = 1.02;
+
 /**
  * 전체 보험료 계산 함수
+ * 계산 결과는 일시납 기준이며, 표시 시 10회 납 적용(×1.02)하여 반환합니다.
  */
 function calculateTotalPremium(data, insuranceType, ageGroup, selectedCoverages) {
     let total = 0;
@@ -123,5 +127,6 @@ function calculateTotalPremium(data, insuranceType, ageGroup, selectedCoverages)
         }
     }
 
-    return total;
+    /* 일시납 합계에 10회 납 계수 적용 */
+    return Math.round(total * PREMIUM_INSTALLMENT_FACTOR);
 }

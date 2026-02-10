@@ -290,7 +290,7 @@ function renderPremiumCalculator() {
                     </li>
                     <li>
                         <span class="premium-footer-bullet">•</span>
-                        <span>보험료 계산식: 대인보험료 + 대물보험료 + 자손보험료 + 자차보험료 + 렌트비용(선택, 대리만) + 법률비용(선택)</span>
+                        <span>보험료 계산식: (대인+대물+자손+자차+렌트+법률) 일시납 기준에 10회 납 적용(×1.02)하여 표시</span>
                     </li>
                     <li>
                         <span class="premium-footer-bullet">•</span>
