@@ -55,6 +55,8 @@
 
 - **config.php** 서버 적용: DB·알리고·**field_encryption_key**(민감정보 암호화) 등 설정 완료.
 - 보험료 산출·가입 신청 흐름 구현·동작. API 테스트(premium-rates, consultations 정상; applications는 config 반영 후 사용).
+- **로고·UI**: 헤더 로고 크기 조정, box-shadow 추가. 로고 이미지 2023 버전 PNG(db-logo.png)로 교체. 원본 픽셀(111×32) 그대로 표시하도록 CSS 변경(흐림 방지). LOGO_GUIDE.md 삭제 후 본 문서 §12로 통합.
+- **보험료 산출**: (1) 일시납 → 10회 납 적용(×1.02) 반영 — premium-data.js `PREMIUM_INSTALLMENT_FACTOR`, `calculateTotalPremium` 반환값에 적용. (2) 담보(대인·대물·자손·자차·렌트·법률) 변경 시 이미 산출된 상태면 자동 재산출 — premium-calculator.js `onCoverageChange`. (3) 기본 담보 — 대인 책임초과무한, 대물 1억, 자손 3천, 자차 3천, 렌트 해제·법률 체크. 렌더 시 select/체크박스에 기본값 반영.
 
 ---
 
@@ -202,7 +204,7 @@ Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
 ### 로고 스펙
 
 - **권장:** 투명 배경 PNG. 공식 참고: https://dbinsure.co.kr/images/new2023_logo.png
-- 헤더 크기: CSS `.logo-img` (style.css). 현재 반응형: 모바일 3rem, 640px+ 3.75rem, 768px+ 4.25rem (우측 메뉴 대비 비율 맞춤).
+- 헤더 크기: CSS `.logo-img` (style.css). **현재** 원본 픽셀 그대로 표시 — `width: 111px; height: 32px` (확대 없이 선명도 유지). 고해상도용은 2배 이상 PNG 또는 SVG 권장.
 
 ### 전체 분위기와 로고 맞추기
 
@@ -218,7 +220,18 @@ Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
   - SMS(알리고) 발송·로그 확인, 암호화 키·config 점검
   - 상담 신청(consultations) 연동·테스트
   - UI·문구·유효성 검사 등 개선
+  - 로고: 고해상도(2x) PNG 또는 SVG 적용 시 `.logo-img` 크기 재조정
 
 ---
 
-**마지막 업데이트**: 2026-02-10 (보험료 산출·가입 신청 완료 반영)
+## 작업 정리 요약 (최근)
+
+| 구분 | 내용 |
+|------|------|
+| **로고** | 111×32px 원본 크기 표시, 2023 버전 PNG 사용, §12 참고 |
+| **보험료** | 일시납×1.02 = 10회 납 표시, 담보 변경 시 자동 재산출, 기본 담보(대인 책임초과무한·대물 1억·자차 3천) |
+| **문서** | LOGO_GUIDE.md 삭제, 로고·이미지는 본 문서 §12 |
+
+---
+
+**마지막 업데이트**: 2026-02-10 (로고·보험료 산출 개선 반영)
