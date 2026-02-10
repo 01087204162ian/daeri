@@ -7,6 +7,19 @@
 
 ---
 
+## 처음 파악용 (5분 요약)
+
+| 항목 | 내용 |
+|------|------|
+| **무엇** | 대리운전 보험 사이트(dbins.kr). Next.js(daeri) → Cafe24(PHP 8.4 + 정적 HTML/JS) 전용 이전. |
+| **기술** | 프론트: `www/index.html` + `www/css/style.css` + `www/js/*.js`. 백엔드: `www/api/*.php`, `www/lib/*.php`. DB: MariaDB 10.6, utf8mb4. |
+| **주요 흐름** | ① 보험료 산출: GET premium-rates → 클라이언트에서 담보별 합산·10회 납(×1.02) 적용. ② 상담 신청: POST consultations. ③ 가입 신청: POST applications(민감정보 암호화). |
+| **로컬 실행** | `cd daeri/cafe24/www && python3 -m http.server 8080` → 브라우저에서 `http://localhost:8080`. (API는 PHP 필요, 실제 연동은 서버 또는 로컬 PHP 환경에서.) |
+| **핵심 파일** | 상황 요약·작업 로그·API·스키마·트러블슈팅: 본 문서. 로고/이미지: §12. 테스트 순서: §11. |
+| **섹션 번호** | 1 개요, 2 작업 로그, 3–7 Phase/스키마, 8 트러블슈팅, 9 디렉터리 구조, 10 다음 할 일, 11 테스트 계획, 12 로고·이미지. |
+
+---
+
 ## 개발 상황 요약
 
 | 구분 | 상태 | 비고 |
@@ -67,7 +80,7 @@
 ## 3. Phase 0 — 사전 점검 요약
 
 - **환경**: PHP 8.4, MariaDB 10.6, dbins.kr, /mr4989/www, cURL 사용 가능. phpinfo는 `info.php` → 확인 후 삭제.
-- **API 4개**: GET premium-rates, POST calculate-premium, POST consultations, POST applications. 파트너: 쿠키/쿼리 `?partner=code`.
+- **API**: GET premium-rates(요율 조회), POST consultations(상담), POST applications(가입). 보험료 계산은 클라이언트(JS)에서 premium-rates 데이터로 산출(별도 calculate-premium API 없음). 파트너: 쿠키/쿼리 `?partner=code`.
 - **스키마**: MariaDB 10.6은 `DEFAULT (UUID())` 미지원 → PHP에서 UUID 생성. 한글 컬럼명 → ASCII(`daemul_3k` 등). JSON 응답 시 `daemul_3천` 등으로 매핑.
 
 ---
@@ -122,6 +135,8 @@
 
 ## 9. www 디렉터리 구조 (목표)
 
+**서버 배포 시**: config.php·lib/ 는 www 상위(`/home/mr4989/`). **로컬 저장소**: `daeri/cafe24/www/` 안에 lib/ 있음(서버 업로드 시 config·lib 위치만 상위로 맞추면 됨).
+
 ```
 /home/mr4989/
 ├── config.php
@@ -132,6 +147,7 @@
 │   └── context.php
 └── www/
     ├── index.html
+    ├── favicon.svg
     ├── images/
     │   └── db-logo.png
     ├── js/
@@ -158,7 +174,7 @@
 
 ### 2단계: 보험료 산출
 - **할 일**: 보험 종목 선택(대리/탁송/확대탁송), 생년월일(또는 나이대) 입력, 담보 선택 후 보험료 계산/표시되는지 확인.
-- **확인**: Network에서 `premium-rates.php` 또는 `calculate-premium` 호출이 200, 응답에 `ok: true`, `data` 있는지. 계산 결과 금액이 화면에 맞게 나오는지.
+- **확인**: Network에서 `premium-rates.php` GET 200, 응답에 `ok: true`, `data` 있는지. 산출 버튼 클릭 후 계산 결과 금액이 화면에 맞게 나오는지(10회 납 ×1.02 적용).
 
 ### 3단계: 상담 신청
 - **할 일**: 상담 신청 폼에 이름·전화번호·내용 입력, 개인정보 동의 체크 후 제출.
