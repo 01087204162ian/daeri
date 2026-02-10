@@ -2,7 +2,7 @@
 /**
  * 가입신청 목록 조회 API (운영용)
  *
- * GET /api/admin-applications.php
+ * GET /api/admin/applications.php
  *
  * - 대상: disk-cms-react (보험상품 > 대리운전 > DB개인대리운전) 페이지
  * - 역할: applications 테이블의 비민감 정보(기본 컬럼)를 조회하여 리스트로 반환
@@ -11,8 +11,8 @@
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_once __DIR__ . '/../lib/db.php';
-require_once __DIR__ . '/../lib/context.php';
+require_once __DIR__ . '/../../lib/db.php';
+require_once __DIR__ . '/../../lib/context.php';
 
 // GET만 허용
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
