@@ -1,6 +1,6 @@
 # www 개발 상황 — Cafe24 daeri 통합 문서
 
-**진행 폴더**: `daeri/cafe24/`  
+**진행 폴더**: `daeri/`  
 **계획서**: `../../docs/MIGRATION_PLAN_SERVER_UTF8_PHP84_MARIADB.md`
 
 이 문서 하나로 **www(Cafe24) 개발 상황**을 파악할 수 있습니다.
@@ -14,7 +14,7 @@
 | **무엇** | 대리운전 보험 사이트(dbins.kr). Next.js(daeri) → Cafe24(PHP 8.4 + 정적 HTML/JS) 전용 이전. |
 | **기술** | 프론트: `www/index.html` + `www/css/style.css` + `www/js/*.js`. 백엔드: `www/api/*.php`, `www/lib/*.php`. DB: MariaDB 10.6, utf8mb4. |
 | **주요 흐름** | ① 보험료 산출: GET premium-rates → 클라이언트에서 담보별 합산·10회 납(×1.02) 적용. ② 상담 신청: POST consultations. ③ 가입 신청: POST applications(민감정보 암호화). |
-| **로컬 실행** | `cd daeri/cafe24/www && python3 -m http.server 8080` → 브라우저에서 `http://localhost:8080`. (API는 PHP 필요, 실제 연동은 서버 또는 로컬 PHP 환경에서.) |
+| **로컬 실행** | `cd daeri/www && python3 -m http.server 8080` → 브라우저에서 `http://localhost:8080`. (API는 PHP 필요, 실제 연동은 서버 또는 로컬 PHP 환경에서.) |
 | **핵심 파일** | 상황 요약·작업 로그·API·스키마·트러블슈팅: 본 문서. 로고/이미지: §12. 테스트 순서: §11. |
 | **섹션 번호** | 1 개요, 2 작업 로그, 3–7 Phase/스키마, 8 트러블슈팅, 9 디렉터리 구조, 10 다음 할 일, 11 테스트 계획, 12 로고·이미지. |
 
@@ -135,7 +135,7 @@
 
 ## 9. www 디렉터리 구조 (목표)
 
-**서버 배포 시**: config.php·lib/ 는 www 상위(`/home/mr4989/`). **로컬 저장소**: `daeri/cafe24/www/` 안에 lib/ 있음(서버 업로드 시 config·lib 위치만 상위로 맞추면 됨).
+**서버 배포 시**: config.php·lib/ 는 www 상위(`/home/mr4989/`). **로컬 저장소**: `daeri/www/` 안에 lib/ 있음(서버 업로드 시 config·lib 위치만 상위로 맞추면 됨).
 
 ```
 /home/mr4989/
@@ -198,8 +198,8 @@ Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
 
 | 용도 | HTML에서 쓰는 경로 | 로컬 파일 위치 | 서버 업로드 위치 |
 |------|---------------------|-----------------|-------------------|
-| 헤더 로고 | `/images/db-logo.png` | `daeri/cafe24/www/images/db-logo.png` | `~/www/images/db-logo.png` |
-| Favicon | `/favicon.svg` | `daeri/cafe24/www/favicon.svg` | `~/www/favicon.svg` |
+| 헤더 로고 | `/images/db-logo.png` | `daeri/www/images/db-logo.png` | `~/www/images/db-logo.png` |
+| Favicon | `/favicon.svg` | `daeri/www/favicon.svg` | `~/www/favicon.svg` |
 
 - index.html 에서 `src="/images/db-logo.png"` 로 참조. DOCUMENT_ROOT가 `/home/mr4989/www` 이면 `http://dbins.kr/images/db-logo.png` → 서버 **`/home/mr4989/www/images/db-logo.png`** 를 찾음.
 
@@ -208,13 +208,13 @@ Cafe24는 정적 HTML + PHP 환경이므로 `<img>` 로 로고를 넣습니다.
 - **증상:** `GET http://dbins.kr/images/db-logo.png 404`
 - **원인:** 서버에 `~/www/images/` 또는 `db-logo.png` 없음.
 - **해결:**
-  1. 로컬: `daeri/public/images/db-logo.png` 를 `daeri/cafe24/www/images/db-logo.png` 로 복사 (또는 공식 URL에서 다운로드).
+  1. 로컬: `daeri/public/images/db-logo.png` 를 `daeri/www/images/db-logo.png` 로 복사 (또는 공식 URL에서 다운로드).
   2. 서버: FTP/SFTP로 `www/images/db-logo.png` 업로드. `mkdir -p ~/www/images` 후 업로드.
   3. 확인: 브라우저에서 `http://dbins.kr/images/db-logo.png` 접속 → 이미지 표시되면 성공.
 
 ### Favicon
 
-- **파일:** `daeri/cafe24/www/favicon.svg`. index.html 에 `<link rel="icon" type="image/svg+xml" href="/favicon.svg">` 반영됨.
+- **파일:** `daeri/www/favicon.svg`. index.html 에 `<link rel="icon" type="image/svg+xml" href="/favicon.svg">` 반영됨.
 - 서버에는 `~/www/favicon.svg` 로 업로드.
 
 ### 로고 스펙
